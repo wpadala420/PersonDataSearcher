@@ -43,22 +43,32 @@ class Person(object):
         self.rejestrUrl=url
 
     def printData(self):
-        print('Imie: {}\n'.format(self.name))
-        print('Nazwisko: {}\n'.format(self.surname))
-        print('Imiona:')
-        for i in self.names:
-            print('\t {}'.format(i))
-        print('\n')
-        print('Data urodzenia: {}\n'.format(self.dateOfBirth))
-        if self.title != '':
-            print('Tytuł: {}\n'.format(self.title))
-        if len(self.branches) is not 0:
-            print('Dziedziny: ')
-            for d in self.branches:
-                print('\t {}'.format(d))
-        print('Dane z rejestrów : \n')
-        print(self.registries)
-        print(self.rejestrUrl)
+        # print('Imie: {}\n'.format(self.name))
+        # print('Nazwisko: {}\n'.format(self.surname))
+        # print('Imiona:')
+        # for i in self.names:
+        #     print('\t {}'.format(i))
+        # print('\n')
+        # print('Data urodzenia: {}\n'.format(self.dateOfBirth))
+        # if self.title != '':
+        #     print('Tytuł: {}\n'.format(self.title))
+        # if len(self.branches) is not 0:
+        #     print('Dziedziny: ')
+        #     for d in self.branches:
+        #         print('\t {}'.format(d))
+        # print('Dane z rejestrów : \n')
+        # print(self.registries)
+        # print(self.rejestrUrl)
+        # print('Twitter:\n')
+        if 'role' in self.twitter:
+            print('\t\t' + self.twitter['role'])
+        print('\t\t' + self.twitter['profile_image_url'])
+        print('\t\t' + self.twitter['nickname'])
+        print('\t\t' + self.twitter['url'])
+        for site in self.twitter['sites']:
+            print('\n\n\n\n' + site)
+        for tweet in self.twitter['tweets']:
+            print('\t\n\n\n' + tweet['utworzono'] + '\t' + tweet['zawartosc'])
 
     def fuze(self, person):
         pass
