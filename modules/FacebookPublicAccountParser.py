@@ -1,6 +1,7 @@
 import bs4
 import requests
 import re
+from modules.functions.detail import check_if_link_exist
 
 class FacebookPublicAccountParser:
 
@@ -11,14 +12,13 @@ class FacebookPublicAccountParser:
         self.spantag = '<\s*span[^>]*>(.*?)<\s*/\s*span>'
 
 
-    def search(self, name):
+    def __get_profile_links(self, name):
         url = 'https://facebook.com/public/'
         nameAndSurname = name.split(' ')
         firstName = nameAndSurname[0]
         lastName = nameAndSurname[1]
         url = url + firstName + '+' + lastName
         content = requests.get(url).text
-        soup = bs4.BeautifulSoup(content, "html.parser")
         linesWithData = []
         with open('fbcontent.txt','wb') as file:
             file.write(bytes(content, encoding='utf-8'))
@@ -32,29 +32,19 @@ class FacebookPublicAccountParser:
             tags.append(re.findall(self.aregex,elem))
             tags.append(re.findall(self.spantag,elem))
             tags.append(re.findall(self.divregex,elem))
-        # regex = "[href]=\".*\""
         regex = '<[^>]+?href=["\']([^>]*?)["\']([^>]*?)>(.*?)'
         quotes = []
         for elem in linesWithData:
             quotes.append(re.findall(regex,elem))
-        print(quotes)
-        # for elem in linesWithData:
-        #     for i in range(len(elem)):
-        #         if elem[i] == '<':
-        #             tag = ''
-        #             tag = tag + elem[i]
-        #             j = i
-        #             while elem[j] != '>':
-        #                 tag = tag + elem[j]
-        #                 j = j + 1
-        #             if elem[j] == '>':
-        #                 tag = tag + elem[j]
-        #                 tags.append(tag)
-        # for tag in tags:
-        #     print(tag + '\n')
-        # for t in tags:
-        #     print(t)
+        links = []
+        url_regex = '^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&\'\(\)\*\+,;=.]+$'
+        for quote in quotes:
+            for elem in quote:
+                for var in elem:
+                    if links.count(var) == 0 and check_if_link_exist(links, var) and re.match(url_regex, var):
+                        links.append(var)
+        return links
+
 
 if __name__ == '__main__':
     fb = FacebookPublicAccountParser()
-    fb.search('Emil Wrobel')
