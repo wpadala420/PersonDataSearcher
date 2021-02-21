@@ -23,6 +23,8 @@ class FacebookPublicAccountParser:
         content = requests.get(url).text
         soup = bs4.BeautifulSoup(content, "html.parser")
         linesWithData = []
+        hrefs = []
+        links = []
         with open('fbcontent.txt','wb') as file:
             file.write(bytes(cont, encoding='utf-8'))
         with open('fbcontent.txt', 'rb') as file:
@@ -44,7 +46,21 @@ class FacebookPublicAccountParser:
                         tag = tag + elem[j]
                         tags.append(tag)
         for tag in tags:
-            print(tag + '\n')
+            if tag.find('href') != -1:
+                hrefs.append(tag)
+        for href in hrefs:
+            split = href.split(' ')
+            for part in split:
+                if part.find('href') != -1:
+                    href_split = part.split('=')
+                    for hs in href_split:
+                        if hs.find('http') != -1:
+                            corrected_link = hs.replace('>','').replace('"','')
+                            if corrected_link.endswith('/photos') is False:
+                                links.append(corrected_link)
+        links = set(links)
+        for link in links:
+            print(link)
 
 
 if __name__ == '__main__':
