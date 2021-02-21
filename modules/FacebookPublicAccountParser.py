@@ -107,13 +107,16 @@ class FacebookPublicAccountParser:
                         url += str_var[i]
                     elif str_var[i] == '"':
                         end = True
-                #print(url)
+                print(url)
                 search_get = session.get(url).content
                 search_get_str = str(search_get, encoding='utf-8')
-                print(search_get_str)
+                soup = bs4.BeautifulSoup(search_get_str, 'html.parser')
+                divs = soup.find_all('div', {'class' : '_a5o _9_7 _2rgt _1j-f'})
+                for d in divs:
+                    print(d)
 
 
 
 if __name__ == '__main__':
-    fb = FacebookPublicAccountParser('vojtekk94@o2.pl', 'kochampalictrawke')
+    fb = FacebookPublicAccountParser()
     fb.loggingSearch('Emil Wrobel')
