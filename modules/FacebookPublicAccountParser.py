@@ -85,8 +85,7 @@ class FacebookPublicAccountParser:
                             if corrected_link.endswith('/photos') is False:
                                 links.append(corrected_link)
         links = set(links)
-        for link in links:
-            print(link)
+        return links
 
     def loggingSearch(self, name):
         session = requests.session()
@@ -95,28 +94,41 @@ class FacebookPublicAccountParser:
         })
         a,b,c = self.login(session, self.email, self.password)
         if b:
-            search_query = 'https://m.facebook.com/search/top/?q=' + name + '&ref=content_filter&source=typeahead'
             print(a + ':' + b + ':' + c)
-            var = session.get(search_query).content
-            str_var = str(var, encoding='utf-8')
-            if str_var.find('https://m.facebook.com/graphsearch/str/') != -1:
-                end = False
-                url = ''
-                for i in range(str_var.find('https://m.facebook.com/graphsearch/str/'), len(str_var)):
-                    if str_var[i] != '"' and end is False:
-                        url += str_var[i]
-                    elif str_var[i] == '"':
-                        end = True
-                print(url)
-                search_get = session.get(url).content
-                search_get_str = str(search_get, encoding='utf-8')
-                soup = bs4.BeautifulSoup(search_get_str, 'html.parser')
-                divs = soup.find_all('div', {'class' : '_a5o _9_7 _2rgt _1j-f'})
-                for d in divs:
-                    print(d)
+            links = self.nonLoggingSearch(name)
+            for link in links:
+                if link.find('people') == -1:
+                    print(link.replace('www.', 'm.'))
+                    search_query = link.replace('www.', 'm.')
+                    new_sess = session.get(search_query)
+                    var = new_sess.content
+                    var_t = new_sess.text
+                    str_var = str(var, encoding='utf-8')
+                    print(str_var)
+                    soup = bs4.BeautifulSoup(str_var, 'html.parser')
+                    # about_tags = soup.find_all('a')
+                    # for about_tag in about_tags:
+                    #     if about_tag.find('href') != -1:
+                    #         print(about_tag)
+                    pass
+            # if str_var.find('https://m.facebook.com/graphsearch/str/') != -1:
+            #     end = False
+            #     url = ''
+            #     for i in range(str_var.find('https://m.facebook.com/graphsearch/str/'), len(str_var)):
+            #         if str_var[i] != '"' and end is False:
+            #             url += str_var[i]
+            #         elif str_var[i] == '"':
+            #             end = True
+            #     print(url)
+            #     search_get = session.get(url).content
+            #     search_get_str = str(search_get, encoding='utf-8')
+            #     soup = bs4.BeautifulSoup(search_get_str, 'html.parser')
+            #     divs = soup.find_all('div', {'class' : '_a5o _9_7 _2rgt _1j-f'})
+            #     for d in divs:
+            #         print(d)
 
 
 
 if __name__ == '__main__':
-    fb = FacebookPublicAccountParser()
+    fb = FacebookPublicAccountParser('vojtekk94@o2.pl', 'kochampalictrawke')
     fb.loggingSearch('Emil Wrobel')

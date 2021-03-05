@@ -11,8 +11,9 @@ class RegistrySearcher:
         req = requests.get('https://rejestr.io/api/search.json?page=1&perPage=100&app=&q={}'.format(name))
         dictionary = req.json()
         people = []
-        pagesNumber = int(int(dictionary['total']) / 100)
-        if int(dictionary['total']) % 100 > 0:
+        # print(dictionary['total']['value'])
+        pagesNumber = int(int(dictionary['total']['value']) / 100)
+        if int(dictionary['total']['value']) % 100 > 0:
             pagesNumber = pagesNumber + 1
 
         for i in range(pagesNumber):
@@ -20,7 +21,8 @@ class RegistrySearcher:
                 'https://rejestr.io/api/search.json?page={}&perPage=100&app=&q={}'.format(str(i + 1), name))
             if req.status_code == 200:
                 dictionary = req.json()
-                for k in dictionary['items']:
+                print(dictionary['persons'])
+                for k in dictionary['persons']['items']:
                     if k['class'] == 'Person' or 'SciencePerson':
                         people.append(k)
             else:
@@ -102,7 +104,8 @@ class RegistrySearcher:
         self.peopleFound=self.startSearch(name)
 
 
-
+reg = RegistrySearcher()
+print(reg.searchData('Damian Rusinek'))
 
 
 
