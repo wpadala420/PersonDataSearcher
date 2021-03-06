@@ -10,6 +10,7 @@ import os
 import urllib3
 from instagramPictures import *
 from instaloader import *
+import time
 #from facebookHandler import Account
 
 
@@ -20,11 +21,15 @@ class InstagramSearcher:
         self.peopleFound = []
 
     def search(self, name):
-        data = requests.get(
-            'https://www.instagram.com/web/search/topsearch/?context=blended&query={}-{}&rank_token=0.6093586799873352&include_reel=true'
-                .format(name.split(' ')[0], name.split(' ')[1])).json()
+        session = requests.session()
+        session.headers.update({
+            'User-Agent': 'Mozilla/5.0 (X11; Linux i686; rv:39.0) Gecko/20100101 Firefox/39.0'
+        })
+        data = session.get(
+            'https://www.instagram.com/web/search/topsearch/?context=blended&query={}-{}&rank_token=0.6093586799873352&include_reel=true'.format(name.split(' ')[0], name.split(' ')[1])).json()
         j = 0
         for i in data['users']:
+            print('GOT IT\n')
             osoba = Person()
             osoba.setName(i['user']['full_name'].split(' ')[0])
             if len(i['user']['full_name'].split(' ')) > 1:
@@ -66,5 +71,11 @@ class InstagramSearcher:
                     # photo2.close()
                     # osoba.photos.append(str(photo2))
                     # osoba.photosNumber += 1
+                time.sleep(2)
             self.peopleFound.append(osoba)
             j += 1
+
+
+insts = InstagramSearcher()
+insts.search('Jakub Bomba')
+print(insts.peopleFound)

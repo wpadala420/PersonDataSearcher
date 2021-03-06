@@ -9,14 +9,10 @@ class TwitterSearch:
 
 
     def search(self,name):
-        twitter=Twitter(auth=OAuth('1107675488498184192-bAvioh07linmWF5NYmHPzIFBmolqhO',
-                                   'SWKoIg16Oiiif1hIuZb9Ue7dZ0DEIuoQqf46i8BjJnjdO',
-                                   'xUGY1ffYlbgqmNw4Fkkv2FiKP',
-                                   'XAa2rIFn35zycE2zQcPYAOnqrLDbVjPKku1T7RxZLASmNpfgHf'))
+        twitter=Twitter(auth=OAuth2(bearer_token=
+                                   'AAAAAAAAAAAAAAAAAAAAABGo9gAAAAAAzl3Q%2FxIEmDUOo1i2Mp1x5mExFNU%3DZpz1s3PDGfGxG5AvZhEsgJ4Ocn5puTxsV5kTT9i8HZ8neD36dy'))
 
-
-        results = twitter.users.search(q = '"{}"'.format(name))
-
+        results = twitter.users.search(q='"{}"'.format(name))
         for i in results:
             osoba=Person.Person()
             osoba.setName(i['name'].split(' ')[0])
@@ -44,3 +40,6 @@ class TwitterSearch:
 
 
 
+ts =TwitterSearch()
+ts.search('Damian Rusinek')
+print(ts.found)

@@ -104,28 +104,16 @@ class FacebookPublicAccountParser:
                     var = new_sess.content
                     var_t = new_sess.text
                     str_var = str(var, encoding='utf-8')
-                    print(str_var)
+                    # print(str_var)
                     soup = bs4.BeautifulSoup(str_var, 'html.parser')
-                    # about_tags = soup.find_all('a')
-                    # for about_tag in about_tags:
-                    #     if about_tag.find('href') != -1:
-                    #         print(about_tag)
+                    about_tags = soup.find_all(href=True)
+                    print(about_tags)
+                    about_divs = []
+                    # for tag in about_tags:
+                    #     about_divs.append(tag.find_all('div', {'id': 'profile_intro_card'}))
+                    # print(about_divs)
                     pass
-            # if str_var.find('https://m.facebook.com/graphsearch/str/') != -1:
-            #     end = False
-            #     url = ''
-            #     for i in range(str_var.find('https://m.facebook.com/graphsearch/str/'), len(str_var)):
-            #         if str_var[i] != '"' and end is False:
-            #             url += str_var[i]
-            #         elif str_var[i] == '"':
-            #             end = True
-            #     print(url)
-            #     search_get = session.get(url).content
-            #     search_get_str = str(search_get, encoding='utf-8')
-            #     soup = bs4.BeautifulSoup(search_get_str, 'html.parser')
-            #     divs = soup.find_all('div', {'class' : '_a5o _9_7 _2rgt _1j-f'})
-            #     for d in divs:
-            #         print(d)
+
 
 
 
