@@ -77,5 +77,5 @@ class InstagramSearcher:
 
 
 insts = InstagramSearcher()
-insts.search('Jakub Bomba')
+insts.search('Ewelina Chmiel')
 print(insts.peopleFound)

@@ -1,6 +1,6 @@
 from twitter import *
 import requests
-import modules.Person
+import Person
 
 class TwitterSearch:
 
@@ -9,10 +9,15 @@ class TwitterSearch:
 
 
     def search(self,name):
-        twitter=Twitter(auth=OAuth2(bearer_token=
-                                   'AAAAAAAAAAAAAAAAAAAAABGo9gAAAAAAzl3Q%2FxIEmDUOo1i2Mp1x5mExFNU%3DZpz1s3PDGfGxG5AvZhEsgJ4Ocn5puTxsV5kTT9i8HZ8neD36dy'))
+        twitter=Twitter(auth=OAuth( '1107675488498184192-KEyVW29WFdnn16NDeuypy0qUHAog82',
+                                   'oFq0J7hHRSkJFpbRWajJE806gZ9jabxH0Cl2En3xKaQRn',
+                                    '9ysGguQkraLB0ZGeDb5xPDUQb',
+                                   'sLGTfM0dZd2nIcjwzZEXtmhDzOmErr7mcVe9G8V4kxl0qporTM'
+                                  ))
 
-        results = twitter.users.search(q='"{}"'.format(name))
+
+        results = twitter.users.search(q = '"{}"'.format(name))
+
         for i in results:
             osoba=Person.Person()
             osoba.setName(i['name'].split(' ')[0])
