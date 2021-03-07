@@ -1,6 +1,9 @@
 from twitter import *
 import requests
 import Person
+import shutil
+import functions.image_functions
+
 
 class TwitterSearch:
 
@@ -42,9 +45,16 @@ class TwitterSearch:
             if 'profile_image_url_https' in i:
                 osoba.twitter['profile_image_url']=i['profile_image_url_https']
             self.found.append(osoba)
-
+        for person in self.found:
+            if 'profile_image_url' in person.twitter:
+                print(person.twitter['profile_image_url'])
+                try:
+                    functions.image_functions.download_image(person.twitter['profile_image_url'], person.twitter['nickname'] + '.jpg')
+                    print(functions.image_functions.get_location_info(person.twitter['nickname'] + '.jpg'))
+                except:
+                    pass
+            print(person)
 
 
 ts =TwitterSearch()
 ts.search('Damian Rusinek')
-print(ts.found)

@@ -11,6 +11,7 @@ import urllib3
 from instagramPictures import *
 from instaloader import *
 import time
+import functions.image_functions
 #from facebookHandler import Account
 
 
@@ -65,17 +66,19 @@ class InstagramSearcher:
                         post['localization'] = str(p.location.name)
 
                     osoba.instagram['posts'].append(post)
+                    functions.image_functions.download_image(p.url, '{}.jpg'.format(osoba.instagram['login'] + str(osoba.photosNumber)))
+                    print(functions.image_functions.get_location_info('{}.jpg'.format(osoba.instagram['login'] + str(osoba.photosNumber))))
                     # photo2 = open(
-                    #     'images/{} {} {}/{}.jpg'.format(osoba.name, osoba.surname, str(j), str(osoba.photosNumber)), 'wb')
+                    #      '{} {} {}/{}.jpg'.format(osoba.name, osoba.surname, str(j), str(osoba.photosNumber)), 'wb')
                     # photo2.write(requests.get(p.url).content)
                     # photo2.close()
                     # osoba.photos.append(str(photo2))
-                    # osoba.photosNumber += 1
+                    osoba.photosNumber += 1
                 time.sleep(2)
             self.peopleFound.append(osoba)
             j += 1
 
 
 insts = InstagramSearcher()
-insts.search('Ewelina Chmiel')
+insts.search('Jakub Bomba')
 print(insts.peopleFound)

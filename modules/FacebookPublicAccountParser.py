@@ -106,8 +106,11 @@ class FacebookPublicAccountParser:
                     str_var = str(var, encoding='utf-8')
                     # print(str_var)
                     soup = bs4.BeautifulSoup(str_var, 'html.parser')
-                    about_tags = soup.find_all(href=True)
-                    print(about_tags)
+                    about_tags = soup.find_all()
+                    for tag in about_tags:
+                        if 'href' in tag:
+                            print(tag)
+                    # print(about_tags)
                     about_divs = []
                     # for tag in about_tags:
                     #     about_divs.append(tag.find_all('div', {'id': 'profile_intro_card'}))
@@ -119,4 +122,4 @@ class FacebookPublicAccountParser:
 
 if __name__ == '__main__':
     fb = FacebookPublicAccountParser('vojtekk94@o2.pl', 'kochampalictrawke')
-    fb.loggingSearch('Emil Wrobel')
+    fb.loggingSearch('Damian Rusinek')
