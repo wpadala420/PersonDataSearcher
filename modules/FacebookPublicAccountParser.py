@@ -50,7 +50,7 @@ class FacebookPublicAccountParser:
         firstName = nameAndSurname[0]
         lastName = nameAndSurname[1]
         url = base_url + '/public/' + firstName + '+' + lastName
-        cont = get(url, headers={':authority:': 'www.facebook.com', ':method:': 'GET', ':path:': '/public/emil+wróbel',
+        cont = get(url, headers={':authority:': 'www.facebook.com', ':method:': 'GET',
                                  ':scheme:': 'https',
                                  'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
                                  'accept-encoding': 'gzip, deflate, br',
@@ -144,6 +144,6 @@ class FacebookPublicAccountParser:
 
 
 if __name__ == '__main__':
-    fb = FacebookPublicAccountParser()
-    fb.loggingSearch('Jakub Bomba')
+    fb = FacebookPublicAccountParser('vojtekk94@o2.pl', 'kochampalictrawke')
+    fb.loggingSearch('Emil Wróbel')
     # print(fb.getAboutUrl('0.txt'))
