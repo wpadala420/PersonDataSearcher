@@ -69,3 +69,6 @@ def get_location_info(filename):
             if coords:
                 geocoder = Here(apikey=HERE_APIKEY)
                 return geocoder.reverse("%s,%s" % coords)
+
+
+print(get_exif('/home/wojciech/osint/PersonDataSearcher/tmp/fbmeta.jpg'))

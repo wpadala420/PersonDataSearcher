@@ -4,14 +4,12 @@ import bs4
 import requests
 import argparse
 import pyquery
+import time
 
 
 class FacebookPublicAccountParser:
 
-    def __init__(self):
-        self.data = {}
-
-    def __init__(self, email, password):
+    def __init__(self, email=None, password=None):
         self.data = {}
         self.email = email
         self.password = password
@@ -32,8 +30,6 @@ class FacebookPublicAccountParser:
                     return result
 
 
-
-
     def login(self, session, email, password):
         response = session.get('https://m.facebook.com')
         response = session.post('https://m.facebook.com/login.php', data={
@@ -44,7 +40,6 @@ class FacebookPublicAccountParser:
             homepage_resp = session.get('https://m.facebook.com/home.php')
             dom = pyquery.PyQuery(homepage_resp.text.encode('utf8'))
             fb_dtsg = dom('input[name="fb_dtsg"]').val()
-
             return fb_dtsg, response.cookies['c_user'], response.cookies['xs']
         else:
             return False
@@ -110,38 +105,45 @@ class FacebookPublicAccountParser:
         session.headers.update({
             'User-Agent': 'Mozilla/5.0 (X11; Linux i686; rv:39.0) Gecko/20100101 Firefox/39.0'
         })
-        a,b,c = self.login(session, self.email, self.password)
-        if b:
-            print(a + ':' + b + ':' + c)
-            links = self.nonLoggingSearch(name)
-            count = 0
-            for link in links:
-                if link.find('people') == -1:
-                    print(link.replace('www.', 'm.'))
-                    search_query = link.replace('www.', 'm.')
-                    new_sess = session.get(search_query)
-                    var = new_sess.content
-                    var_t = new_sess.text
-                    str_var = str(var, encoding='utf-8')
-                    # with open( str(count) + '.txt', 'wb') as tmp_file:
-                    #     tmp_file.write(bytes(str_var, encoding='utf-8'))
-                    #     count += 1
-                    # print(str_var)
-                    soup = bs4.BeautifulSoup(str_var, 'html.parser')
-                    about_tags = soup.find_all()
-                    for tag in about_tags:
-                        if 'href' in tag:
-                            print(tag)
-                    # print(about_tags)
-                    about_divs = []
-                    # for tag in about_tags:
-                    #     about_divs.append(tag.find_all('div', {'id': 'profile_intro_card'}))
-                    # print(about_divs)
-                    pass
+        try:
+            a, b, c = self.login(session, self.email, self.password)
+            time.sleep(3)
+            if b:
+                print(a + ':' + b + ':' + c)
+                links = self.nonLoggingSearch(name)
+                count = 0
+                for link in links:
+                    if link.find('people') == -1:
+                        print(link.replace('www.', 'm.'))
+                        search_query = link.replace('www.', 'm.')
+                        new_sess = session.get(search_query)
+                        var = new_sess.content
+                        var_t = new_sess.text
+                        str_var = str(var, encoding='utf-8')
+                        with open('main_page.txt', 'wb') as tmp_file:
+                            tmp_file.write(bytes(str_var, encoding='utf-8'))
+                        print(self.getAboutUrl('main_page.txt'))
+                        time.sleep(5)
+        except TypeError:
+            print('Nieprawidłowe dane do logowania')
+
+
+
+    def getAboutUrl(self, filename):
+        base_url = 'https://m.facebook.com'
+        with open(filename, 'rb') as data:
+            for line in data:
+                if str(line, encoding='utf-8').find('about') != -1:
+                    for split_line in str(line, encoding='utf-8').split('><'):
+                        if split_line.find('about') != -1 and split_line.find('href="/') != -1:
+                            for selector in split_line.split(' '):
+                                if selector.find('href') != -1:
+                                    return base_url + self.getUrlFromHref(selector)
 
 
 
 
 if __name__ == '__main__':
     fb = FacebookPublicAccountParser()
-    fb.loggingSearch('Emil Wróbel')
+    fb.loggingSearch('Jakub Bomba')
+    # print(fb.getAboutUrl('0.txt'))
