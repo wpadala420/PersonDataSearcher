@@ -5,6 +5,7 @@ import requests
 import argparse
 import pyquery
 import time
+import re
 
 
 class FacebookPublicAccountParser:
@@ -13,6 +14,7 @@ class FacebookPublicAccountParser:
         self.data = {}
         self.email = email
         self.password = password
+        self.people = []
 
     def getUrlFromHref(self, href):
         result = ''
@@ -101,6 +103,7 @@ class FacebookPublicAccountParser:
         return links
 
     def loggingSearch(self, name):
+        year_regex = '[0-9][0-9][0-9][0-9]'
         session = requests.session()
         session.headers.update({
             'User-Agent': 'Mozilla/5.0 (X11; Linux i686; rv:39.0) Gecko/20100101 Firefox/39.0'
@@ -113,6 +116,11 @@ class FacebookPublicAccountParser:
                 links = self.nonLoggingSearch(name)
                 count = 0
                 for link in links:
+                    person = {}
+                    person['name'] = name.split(' ')[0]
+                    person['surname'] = name.split(' ')[1]
+                    person['facebook'] = {}
+
                     if link.find('people') == -1:
                         print(link.replace('www.', 'm.'))
                         search_query = link.replace('www.', 'm.')
@@ -122,7 +130,49 @@ class FacebookPublicAccountParser:
                         str_var = str(var, encoding='utf-8')
                         with open('main_page.txt', 'wb') as tmp_file:
                             tmp_file.write(bytes(str_var, encoding='utf-8'))
-                        print(self.getAboutUrl('main_page.txt'))
+                        about = self.getAboutUrl('main_page.txt')
+                        print(about)
+                        time.sleep(2)
+                        cont = session.get(about).content
+                        soup2 = bs4.BeautifulSoup(cont, 'html.parser')
+                        edu = soup2.find_all('div', {'id': 'education'})
+                        edu_names = []
+                        durations = []
+                        texts = soup2.a.contents
+                        for edu_tag in edu:
+                            tags_ = edu_tag.find_all('div', {'class': 'experience'})
+                            for t in tags_:
+                                name = ()
+                                a_tags = t.find_all('a')
+                                spans = t.find_all('span')
+                                for txts in a_tags:
+                                    if txts.text is not None and txts.text != '':
+
+                                        edu_names.append(txts.text)
+                                        for span in spans:
+                                            if re.search(year_regex, span.text):
+                                                durations.append(span.text)
+                                                break
+
+                            tags_ = edu_tag.find_all('span')
+                            for span in tags_:
+                                if span.text != 'High School' and span.text != 'College':
+                                    edu_names.append(span.text)
+                            for span in tags_:
+                                if re.search(year_regex, span.text):
+                                    durations.append(span.text)
+
+                        for e_name in edu_names:
+                            print(e_name)
+                        for dur in durations:
+                            print(dur)
+                        print(edu)
+
+                        about_content = str(cont, encoding='utf-8')
+                        with open('about.txt', 'wb') as about_file:
+                            about_file.write(bytes(about_content, encoding='utf-8'))
+
+                        # print(self.getAboutData())
                         time.sleep(5)
         except TypeError:
             print('Nieprawidłowe dane do logowania')
@@ -141,9 +191,19 @@ class FacebookPublicAccountParser:
                                     return base_url + self.getUrlFromHref(selector)
 
 
+    def getAboutData(self, filename):
+        education = []
+
+        with open(filename, 'rb') as data:
+            for line in data:
+                pass
+        pass
+
+
+
 
 
 if __name__ == '__main__':
-    fb = FacebookPublicAccountParser('vojtekk94@o2.pl', 'kochampalictrawke')
+    fb = FacebookPublicAccountParser()
     fb.loggingSearch('Emil Wróbel')
     # print(fb.getAboutUrl('0.txt'))
