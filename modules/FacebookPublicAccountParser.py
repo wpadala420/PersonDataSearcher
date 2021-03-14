@@ -183,6 +183,38 @@ class FacebookPublicAccountParser:
                                     living_places.append(living_dict)
 
                         person['facebook']['living_places'] = living_places
+                        #------------------------------------------------------------------------------
+                        # relationship
+                        relationship = []
+                        relationship_elem = soup2.find_all('div', {'id': 'relationship'})
+                        for r_elem in relationship_elem:
+                            relat_elem = r_elem.find_all('div', {'class': '_4g34'})
+                            for elem in relat_elem:
+                                if elem.text.find('In a relationship') != -1:
+                                    relathionship_dict = {'with': elem.text.split('In a relationship')[0],
+                                                          'date': elem.text.split('In a relationship')[1]}
+                                    relationship.append(relathionship_dict)
+                        person['facebook']['relationship'] = relationship
+                        #---------------------------------------------------------------------------------
+                        #family
+                        family = []
+                        family_elem = soup2.find_all('div', {'id': 'family'})
+                        for f_elem in family_elem:
+                            members = f_elem.find_all('div', {'data-sigil': 'touchable'})
+                            for member in members:
+                                names = member.find_all('span')
+                                roles = member.find_all('h3')
+                                name_val = ''
+                                role_val = ''
+                                for name in names:
+                                    if name.text != '':
+                                        name_val = name.text
+                                for role in roles:
+                                    if role.text != '' and role.text != name_val:
+                                        role_val = role.text
+                                family_member = {'name': name_val , 'role': role_val}
+                                family.append(family_member)
+
                         print(person)
                         about_content = str(cont, encoding='utf-8')
                         with open('about.txt', 'wb') as about_file:
