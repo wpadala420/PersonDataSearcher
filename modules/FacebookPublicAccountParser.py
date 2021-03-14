@@ -103,6 +103,8 @@ class FacebookPublicAccountParser:
         return links
 
     def loggingSearch(self, name):
+        name_val = name.split(' ')[0]
+        surname_val = name.split(' ')[1]
         year_regex = '[0-9][0-9][0-9][0-9]'
         session = requests.session()
         session.headers.update({
@@ -117,8 +119,8 @@ class FacebookPublicAccountParser:
                 count = 0
                 for link in links:
                     person = {}
-                    person['name'] = name.split(' ')[0]
-                    person['surname'] = name.split(' ')[1]
+                    person['name'] = name_val
+                    person['surname'] = surname_val
                     person['facebook'] = {}
 
                     if link.find('people') == -1:
@@ -131,11 +133,13 @@ class FacebookPublicAccountParser:
                         with open('main_page.txt', 'wb') as tmp_file:
                             tmp_file.write(bytes(str_var, encoding='utf-8'))
                         about = self.getAboutUrl('main_page.txt')
-                        print(about)
+                        # print(about)
                         time.sleep(2)
                         cont = session.get(about).content
                         soup2 = bs4.BeautifulSoup(cont, 'html.parser')
                         edu = soup2.find_all('div', {'id': 'education'})
+                        #--------------------------------------------------------------------
+                        # education
                         edu_names = []
                         durations = []
                         texts = soup2.a.contents
@@ -146,28 +150,40 @@ class FacebookPublicAccountParser:
                                 a_tags = t.find_all('a')
                                 spans = t.find_all('span')
                                 for txts in a_tags:
-                                    if txts.text is not None and txts.text != '':
-
+                                    if txts.text is not None and txts.text != '' and not re.search(year_regex, txts.text):
                                         edu_names.append(txts.text)
-                                        for span in spans:
-                                            if re.search(year_regex, span.text):
-                                                durations.append(span.text)
-                                                break
+                                        # for span in spans:
+                                        #     if re.search(year_regex, span.text):
+                                        #         durations.append(span.text)
+                                        #         break
 
                             tags_ = edu_tag.find_all('span')
                             for span in tags_:
-                                if span.text != 'High School' and span.text != 'College':
+                                if span.text != 'High School' and span.text != 'College' and not re.search(year_regex, span.text):
                                     edu_names.append(span.text)
-                            for span in tags_:
-                                if re.search(year_regex, span.text):
-                                    durations.append(span.text)
+                            # for span in tags_:
+                            #     if re.search(year_regex, span.text):
+                            #         durations.append(span.text)
+                        edu_names = set(edu_names)
+                        person['facebook']['education'] = edu_names
+                                                # for dur in durations:
+                        #     print(dur)
+                        #----------------------------------------------------------------------------
+                        # living
+                        living_places = []
+                        living = soup2.find_all('div', {'id': 'living'})
+                        for living_elem in living:
+                            data_elems = living_elem.find_all('div', {'class': '_2swz _2lcw'})
+                            for data_elem in data_elems:
+                                if data_elem.text.find('Hometown') != -1:
+                                    living_dict = {'Hometown': data_elem.text.split('Hometown')[0]}
+                                    living_places.append(living_dict)
+                                elif data_elem.text.find('Current City') != -1:
+                                    living_dict = {'Current City': data_elem.text.split('Current City')[0]}
+                                    living_places.append(living_dict)
 
-                        for e_name in edu_names:
-                            print(e_name)
-                        for dur in durations:
-                            print(dur)
-                        print(edu)
-
+                        person['facebook']['living_places'] = living_places
+                        print(person)
                         about_content = str(cont, encoding='utf-8')
                         with open('about.txt', 'wb') as about_file:
                             about_file.write(bytes(about_content, encoding='utf-8'))
@@ -204,6 +220,6 @@ class FacebookPublicAccountParser:
 
 
 if __name__ == '__main__':
-    fb = FacebookPublicAccountParser()
+    fb = FacebookPublicAccountParser('vojtekk94@o2.pl', 'kochampalictrawke')
     fb.loggingSearch('Emil Wróbel')
     # print(fb.getAboutUrl('0.txt'))
