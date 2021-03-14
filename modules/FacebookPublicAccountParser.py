@@ -6,6 +6,8 @@ import argparse
 import pyquery
 import time
 import re
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
 
 
 class FacebookPublicAccountParser:
@@ -102,6 +104,14 @@ class FacebookPublicAccountParser:
         links = set(links)
         return links
 
+    def getFriendsList(self, content):
+        friends = []
+        friends_soup = bs4.BeautifulSoup(content, 'html.parser')
+        elems = friends_soup.find_all('div', {'data-sigil': 'undoable-action'})
+        for elem in elems:
+            friends.append(elem.text.split('Request sent')[0])
+
+
     def loggingSearch(self, name):
         name_val = name.split(' ')[0]
         surname_val = name.split(' ')[1]
@@ -132,6 +142,13 @@ class FacebookPublicAccountParser:
                         str_var = str(var, encoding='utf-8')
                         with open('main_page.txt', 'wb') as tmp_file:
                             tmp_file.write(bytes(str_var, encoding='utf-8'))
+                        #----------------------------------------------------------------------
+                        #friends
+                        friends_url = self.getFriendsUrl('main_page.txt')
+                        friends_content = self.getFriendsContent(friends_url)
+                        person['facebook']['friends'] = self.getFriendsList(friends_content)
+
+                        #---------------------------------------------------------------------
                         about = self.getAboutUrl('main_page.txt')
                         # print(about)
                         time.sleep(2)
@@ -214,6 +231,8 @@ class FacebookPublicAccountParser:
                                         role_val = role.text
                                 family_member = {'name': name_val , 'role': role_val}
                                 family.append(family_member)
+                        #-----------------------------------------------------------------------------
+                        # friends url
 
                         print(person)
                         about_content = str(cont, encoding='utf-8')
@@ -238,6 +257,51 @@ class FacebookPublicAccountParser:
                                 if selector.find('href') != -1:
                                     return base_url + self.getUrlFromHref(selector)
 
+    def getFriendsUrl(self, filename):
+        base_url = 'https://m.facebook.com'
+        with open(filename, 'rb') as data:
+            for line in data:
+                if str(line, encoding='utf-8').find('friends') != -1:
+                    for split_line in str(line, encoding='utf-8').split('><'):
+                        if split_line.find('friends?') != -1 and split_line.find('href="/') != -1:
+                            for selector in split_line.split(' '):
+                                if selector.find('href') != -1:
+                                    return base_url + self.getUrlFromHref(selector)
+
+    def getFriendsContent(self, url):
+        options = Options()
+        options.headless = True
+        browser = webdriver.Firefox(options=options)
+        browser.get('https://m.facebook.com/login.php')
+        browser.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+        time.sleep(3)
+        submit = browser.find_element_by_id("accept-cookie-banner-label")
+        submit.click()
+        time.sleep(2)
+        email = browser.find_element_by_id('m_login_email')
+        password = browser.find_element_by_id('m_login_password')
+        email.send_keys(self.email)
+        password.send_keys(self.password)
+        submit = browser.find_element_by_name('login')
+        submit.click()
+        time.sleep(10)
+        not_now = browser.find_element_by_class_name('_2pii')
+        not_now.click()
+        time.sleep(7)
+        browser.get(url)
+        last_height = browser.execute_script('return document.body.scrollHeight')
+        browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+        time.sleep(5)
+        new_height = browser.execute_script('return document.body.scrollHeight')
+        while new_height != last_height:
+            last_height = new_height
+            browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+            time.sleep(5)
+            new_height = browser.execute_script('return document.body.scrollHeight')
+
+        content = browser.execute_script("return document.documentElement.outerHTML;")
+        browser.close()
+        return content
 
     def getAboutData(self, filename):
         education = []
@@ -252,6 +316,6 @@ class FacebookPublicAccountParser:
 
 
 if __name__ == '__main__':
-    fb = FacebookPublicAccountParser('vojtekk94@o2.pl', 'kochampalictrawke')
-    fb.loggingSearch('Emil Wróbel')
-    # print(fb.getAboutUrl('0.txt'))
+    fb = FacebookPublicAccountParser('vojtekk94@o2.pl', 'kochamEweline123')
+    fb.loggingSearch('Przemek Bednara')
+
