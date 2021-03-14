@@ -110,6 +110,7 @@ class FacebookPublicAccountParser:
         elems = friends_soup.find_all('div', {'data-sigil': 'undoable-action'})
         for elem in elems:
             friends.append(elem.text.split('Request sent')[0])
+        return friends
 
 
     def loggingSearch(self, name):
@@ -316,6 +317,8 @@ class FacebookPublicAccountParser:
 
 
 if __name__ == '__main__':
-    fb = FacebookPublicAccountParser('vojtekk94@o2.pl', 'kochamEweline123')
+    fb = FacebookPublicAccountParser()
     fb.loggingSearch('Przemek Bednara')
-
+    # url = fb.getFriendsUrl('0.txt')
+    # cont = fb.getFriendsContent(url)
+    # print(fb.getFriendsList(cont))
