@@ -1,6 +1,6 @@
 from twitter import *
 import requests
-import Person
+from modules import Person
 import shutil
 import functions.image_functions
 
@@ -24,8 +24,11 @@ class TwitterSearch:
         for i in results:
             osoba=Person.Person()
             osoba.setName(i['name'].split(' ')[0])
-            osoba.setSurname(i['name'].split(' ')[1])
+            if len(i['name'].split(' ')) > 1:
+                osoba.setSurname(i['name'].split(' ')[1])
+
             osoba.twitter['nickname']=i['screen_name']
+            osoba.twitter['report']=''
             if i['description'] is not '':
                 osoba.twitter['role']=i['description']
             osoba.twitter['url']='https://twitter.com/{}'.format(i['screen_name'])
@@ -53,8 +56,6 @@ class TwitterSearch:
                     print(functions.image_functions.get_location_info(person.twitter['nickname'] + '.jpg'))
                 except:
                     pass
-            print(person)
 
 
-ts =TwitterSearch()
-ts.search('Damian Rusinek')
+

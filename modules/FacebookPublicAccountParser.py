@@ -114,6 +114,7 @@ class FacebookPublicAccountParser:
 
 
     def loggingSearch(self, name):
+        people = []
         name_val = name.split(' ')[0]
         surname_val = name.split(' ')[1]
         year_regex = '[0-9][0-9][0-9][0-9]'
@@ -121,129 +122,304 @@ class FacebookPublicAccountParser:
         session.headers.update({
             'User-Agent': 'Mozilla/5.0 (X11; Linux i686; rv:39.0) Gecko/20100101 Firefox/39.0'
         })
+        webdriver_logging = False
         try:
             a, b, c = self.login(session, self.email, self.password)
-            time.sleep(3)
-            if b:
+        except TypeError:
+            print('Nieprawidłowe dane do logowania lub niepowodzenie logowania, próba logowania przez webdriver\n')
+            webdriver_logging = True
+            b = None
+        time.sleep(3)
+        links = self.nonLoggingSearch(name)
+        count = 0
+        for link in links:
+            person = {}
+            person['name'] = name_val
+            person['surname'] = surname_val
+            person['facebook'] = {}
+
+            if link.find('people') == -1:
+                print(link.replace('www.', 'm.'))
+                search_query = link.replace('www.', 'm.')
+                if b:
+                    print(a + ':' + b + ':' + c)
+                    new_sess = session.get(search_query)
+                    var = new_sess.content
+                    var_t = new_sess.text
+                    str_var = str(var, encoding='utf-8')
+                    with open('main_page.txt', 'wb') as tmp_file:
+                        tmp_file.write(bytes(str_var, encoding='utf-8'))
+                elif webdriver_logging:
+                    str_var = self.getProfileContent(search_query)
+                    with open('main_page.txt', 'wb') as tmp_file:
+                        tmp_file.write(bytes(str_var, encoding='utf-8'))
+                # ----------------------------------------------------------------------
+                # friends
+                friends_url = self.getFriendsUrl('main_page.txt')
+                friends_content = self.getFriendsContent(friends_url)
+                person['facebook']['friends'] = self.getFriendsList(friends_content)
+
+                # ---------------------------------------------------------------------
+                about = self.getAboutUrl('main_page.txt')
+                # print(about)
+                time.sleep(2)
+                cont = None
+                if b:
+                    cont = session.get(about).content
+                elif webdriver_logging:
+                    cont = self.getAboutContent(about)
+                soup2 = bs4.BeautifulSoup(cont, 'html.parser')
+                edu = soup2.find_all('div', {'id': 'education'})
+                # --------------------------------------------------------------------
+                # education
+                edu_names = []
+                durations = []
+                texts = soup2.a.contents
+                for edu_tag in edu:
+                    tags_ = edu_tag.find_all('div', {'class': 'experience'})
+                    for t in tags_:
+                        name = ()
+                        a_tags = t.find_all('a')
+                        spans = t.find_all('span')
+                        for txts in a_tags:
+                            if txts.text is not None and txts.text != '' and not re.search(year_regex, txts.text):
+                                edu_names.append(txts.text)
+                                # for span in spans:
+                                #     if re.search(year_regex, span.text):
+                                #         durations.append(span.text)
+                                #         break
+
+                    tags_ = edu_tag.find_all('span')
+                    for span in tags_:
+                        if span.text != 'High School' and span.text != 'College' and not re.search(year_regex,
+                                                                                                   span.text):
+                            edu_names.append(span.text)
+                    # for span in tags_:
+                    #     if re.search(year_regex, span.text):
+                    #         durations.append(span.text)
+                edu_names = set(edu_names)
+                person['facebook']['education'] = edu_names
+                # for dur in durations:
+                #     print(dur)
+                # ----------------------------------------------------------------------------
+                # living
+                living_places = []
+                living = soup2.find_all('div', {'id': 'living'})
+                for living_elem in living:
+                    data_elems = living_elem.find_all('div', {'class': '_2swz _2lcw'})
+                    for data_elem in data_elems:
+                        if data_elem.text.find('Hometown') != -1:
+                            living_dict = {'Hometown': data_elem.text.split('Hometown')[0]}
+                            living_places.append(living_dict)
+                        elif data_elem.text.find('Current City') != -1:
+                            living_dict = {'Current City': data_elem.text.split('Current City')[0]}
+                            living_places.append(living_dict)
+
+                person['facebook']['living_places'] = living_places
+                # ------------------------------------------------------------------------------
+                # relationship
+                relationship = []
+                relationship_elem = soup2.find_all('div', {'id': 'relationship'})
+                for r_elem in relationship_elem:
+                    relat_elem = r_elem.find_all('div', {'class': '_4g34'})
+                    for elem in relat_elem:
+                        if elem.text.find('In a relationship') != -1:
+                            relathionship_dict = {'with': elem.text.split('In a relationship')[0],
+                                                  'date': elem.text.split('In a relationship')[1]}
+                            relationship.append(relathionship_dict)
+                person['facebook']['relationship'] = relationship
+                # ---------------------------------------------------------------------------------
+                # family
+                family = []
+                family_elem = soup2.find_all('div', {'id': 'family'})
+                for f_elem in family_elem:
+                    members = f_elem.find_all('div', {'data-sigil': 'touchable'})
+                    for member in members:
+                        names = member.find_all('span')
+                        roles = member.find_all('h3')
+                        name_val = ''
+                        role_val = ''
+                        for name in names:
+                            if name.text != '':
+                                name_val = name.text
+                        for role in roles:
+                            if role.text != '' and role.text != name_val:
+                                role_val = role.text
+                        family_member = {'name': name_val, 'role': role_val}
+                        family.append(family_member)
+                # -----------------------------------------------------------------------------
+                # friends url
+
+                print(person)
+                people.append(person)
+        return people
+                # about_content = str(cont, encoding='utf-8')
+                # with open('about.txt', 'wb') as about_file:
+                #     about_file.write(bytes(about_content, encoding='utf-8'))
+                #
+                # print(self.getAboutData())
+                # time.sleep(5)
+
+    def loggingSearchNew(self, name):
+        people = []
+        name_val = name.split(' ')[0]
+        surname_val = name.split(' ')[1]
+        year_regex = '[0-9][0-9][0-9][0-9]'
+        session = requests.session()
+        session.headers.update({
+            'User-Agent': 'Mozilla/5.0 (X11; Linux i686; rv:39.0) Gecko/20100101 Firefox/39.0'
+        })
+        webdriver_logging = False
+        parse_data = []
+        try:
+            a, b, c = self.login(session, self.email, self.password)
+        except TypeError:
+            print('Nieprawidłowe dane do logowania lub niepowodzenie logowania, próba logowania przez webdriver\n')
+            webdriver_logging = True
+            b = None
+        time.sleep(3)
+        links = self.nonLoggingSearch(name)
+        new_links = []
+        for link in links:
+            if link.find('people') == -1:
+                link = link.replace('www.', 'm.')
+                new_links.append(link)
+        links = new_links
+        count = 0
+
+        if b:
+            general_contents = []
+            about_contents = []
+            friends_contents = []
+            for link in links:
                 print(a + ':' + b + ':' + c)
-                links = self.nonLoggingSearch(name)
-                count = 0
-                for link in links:
-                    person = {}
-                    person['name'] = name_val
-                    person['surname'] = surname_val
-                    person['facebook'] = {}
+                new_sess = session.get(link)
+                var = new_sess.content
+                var_t = new_sess.text
+                str_var = str(var, encoding='utf-8')
+                general_contents.append(str_var)
+                with open('main_page.txt', 'wb') as tmp_file:
+                    tmp_file.write(bytes(str_var, encoding='utf-8'))
+                friends_url = self.getFriendsUrl('main_page.txt')
+                friends_content = self.getFriendsContent(friends_url)
+                friends_contents.append(friends_content)
+                about_url = self.getAboutUrl('main_page.txt')
+                about_content = str(session.get(about_url).content, encoding='utf-8')
+                about_contents.append(about_content)
+            for i in range(0, len(general_contents)):
+                data = {'general': general_contents[i], 'about': about_contents[i], 'friends': friends_contents[i]}
+                parse_data.append(data)
+        else:
+            general_contents, about_contents, friends_contents = self.getAllContentsByWebdriver(links)
+            for i in range(0, len(general_contents)):
+                data = {'general': general_contents[i], 'about': about_contents[i], 'friends': friends_contents[i]}
+                parse_data.append(data)
 
-                    if link.find('people') == -1:
-                        print(link.replace('www.', 'm.'))
-                        search_query = link.replace('www.', 'm.')
-                        new_sess = session.get(search_query)
-                        var = new_sess.content
-                        var_t = new_sess.text
-                        str_var = str(var, encoding='utf-8')
-                        with open('main_page.txt', 'wb') as tmp_file:
-                            tmp_file.write(bytes(str_var, encoding='utf-8'))
-                        #----------------------------------------------------------------------
-                        #friends
-                        friends_url = self.getFriendsUrl('main_page.txt')
-                        friends_content = self.getFriendsContent(friends_url)
-                        person['facebook']['friends'] = self.getFriendsList(friends_content)
+        for link in parse_data:
+            person = {}
+            person['name'] = name_val
+            person['surname'] = surname_val
+            person['facebook'] = {}
+            person['facebook']['friends'] = self.getFriendsList(link['friends'])
 
-                        #---------------------------------------------------------------------
-                        about = self.getAboutUrl('main_page.txt')
-                        # print(about)
-                        time.sleep(2)
-                        cont = session.get(about).content
-                        soup2 = bs4.BeautifulSoup(cont, 'html.parser')
-                        edu = soup2.find_all('div', {'id': 'education'})
-                        #--------------------------------------------------------------------
-                        # education
-                        edu_names = []
-                        durations = []
-                        texts = soup2.a.contents
-                        for edu_tag in edu:
-                            tags_ = edu_tag.find_all('div', {'class': 'experience'})
-                            for t in tags_:
-                                name = ()
-                                a_tags = t.find_all('a')
-                                spans = t.find_all('span')
-                                for txts in a_tags:
-                                    if txts.text is not None and txts.text != '' and not re.search(year_regex, txts.text):
-                                        edu_names.append(txts.text)
-                                        # for span in spans:
-                                        #     if re.search(year_regex, span.text):
-                                        #         durations.append(span.text)
-                                        #         break
-
-                            tags_ = edu_tag.find_all('span')
-                            for span in tags_:
-                                if span.text != 'High School' and span.text != 'College' and not re.search(year_regex, span.text):
-                                    edu_names.append(span.text)
-                            # for span in tags_:
+            # ---------------------------------------------------------------------
+            about = self.getAboutUrl('main_page.txt')
+            # print(about)
+            time.sleep(2)
+            cont = None
+            soup2 = bs4.BeautifulSoup(link['about'], 'html.parser')
+            edu = soup2.find_all('div', {'id': 'education'})
+            # --------------------------------------------------------------------
+            # education
+            edu_names = []
+            durations = []
+            texts = soup2.a.contents
+            for edu_tag in edu:
+                tags_ = edu_tag.find_all('div', {'class': 'experience'})
+                for t in tags_:
+                    name = ()
+                    a_tags = t.find_all('a')
+                    spans = t.find_all('span')
+                    for txts in a_tags:
+                        if txts.text is not None and txts.text != '' and not re.search(year_regex, txts.text):
+                            edu_names.append(txts.text)
+                            # for span in spans:
                             #     if re.search(year_regex, span.text):
                             #         durations.append(span.text)
-                        edu_names = set(edu_names)
-                        person['facebook']['education'] = edu_names
-                                                # for dur in durations:
-                        #     print(dur)
-                        #----------------------------------------------------------------------------
-                        # living
-                        living_places = []
-                        living = soup2.find_all('div', {'id': 'living'})
-                        for living_elem in living:
-                            data_elems = living_elem.find_all('div', {'class': '_2swz _2lcw'})
-                            for data_elem in data_elems:
-                                if data_elem.text.find('Hometown') != -1:
-                                    living_dict = {'Hometown': data_elem.text.split('Hometown')[0]}
-                                    living_places.append(living_dict)
-                                elif data_elem.text.find('Current City') != -1:
-                                    living_dict = {'Current City': data_elem.text.split('Current City')[0]}
-                                    living_places.append(living_dict)
+                            #         break
 
-                        person['facebook']['living_places'] = living_places
-                        #------------------------------------------------------------------------------
-                        # relationship
-                        relationship = []
-                        relationship_elem = soup2.find_all('div', {'id': 'relationship'})
-                        for r_elem in relationship_elem:
-                            relat_elem = r_elem.find_all('div', {'class': '_4g34'})
-                            for elem in relat_elem:
-                                if elem.text.find('In a relationship') != -1:
-                                    relathionship_dict = {'with': elem.text.split('In a relationship')[0],
-                                                          'date': elem.text.split('In a relationship')[1]}
-                                    relationship.append(relathionship_dict)
-                        person['facebook']['relationship'] = relationship
-                        #---------------------------------------------------------------------------------
-                        #family
-                        family = []
-                        family_elem = soup2.find_all('div', {'id': 'family'})
-                        for f_elem in family_elem:
-                            members = f_elem.find_all('div', {'data-sigil': 'touchable'})
-                            for member in members:
-                                names = member.find_all('span')
-                                roles = member.find_all('h3')
-                                name_val = ''
-                                role_val = ''
-                                for name in names:
-                                    if name.text != '':
-                                        name_val = name.text
-                                for role in roles:
-                                    if role.text != '' and role.text != name_val:
-                                        role_val = role.text
-                                family_member = {'name': name_val , 'role': role_val}
-                                family.append(family_member)
-                        #-----------------------------------------------------------------------------
-                        # friends url
+                tags_ = edu_tag.find_all('span')
+                for span in tags_:
+                    if span.text != 'High School' and span.text != 'College' and not re.search(year_regex,
+                                                                                               span.text):
+                        edu_names.append(span.text)
+                # for span in tags_:
+                #     if re.search(year_regex, span.text):
+                #         durations.append(span.text)
+            edu_names = set(edu_names)
+            person['facebook']['education'] = edu_names
+            # for dur in durations:
+            #     print(dur)
+            # ----------------------------------------------------------------------------
+            # living
+            living_places = []
+            living = soup2.find_all('div', {'id': 'living'})
+            for living_elem in living:
+                data_elems = living_elem.find_all('div', {'class': '_2swz _2lcw'})
+                for data_elem in data_elems:
+                    if data_elem.text.find('Hometown') != -1:
+                        living_dict = {'Hometown': data_elem.text.split('Hometown')[0]}
+                        living_places.append(living_dict)
+                    elif data_elem.text.find('Current City') != -1:
+                        living_dict = {'Current City': data_elem.text.split('Current City')[0]}
+                        living_places.append(living_dict)
 
-                        print(person)
-                        about_content = str(cont, encoding='utf-8')
-                        with open('about.txt', 'wb') as about_file:
-                            about_file.write(bytes(about_content, encoding='utf-8'))
+            person['facebook']['living_places'] = living_places
+            # ------------------------------------------------------------------------------
+            # relationship
+            relationship = []
+            relationship_elem = soup2.find_all('div', {'id': 'relationship'})
+            for r_elem in relationship_elem:
+                relat_elem = r_elem.find_all('div', {'class': '_4g34'})
+                for elem in relat_elem:
+                    if elem.text.find('In a relationship') != -1:
+                        relathionship_dict = {'with': elem.text.split('In a relationship')[0],
+                                              'date': elem.text.split('In a relationship')[1]}
+                        relationship.append(relathionship_dict)
+            person['facebook']['relationship'] = relationship
+            # ---------------------------------------------------------------------------------
+            # family
+            family = []
+            family_elem = soup2.find_all('div', {'id': 'family'})
+            for f_elem in family_elem:
+                members = f_elem.find_all('div', {'data-sigil': 'touchable'})
+                for member in members:
+                    names = member.find_all('span')
+                    roles = member.find_all('h3')
+                    name_val = ''
+                    role_val = ''
+                    for name in names:
+                        if name.text != '':
+                            name_val = name.text
+                    for role in roles:
+                        if role.text != '' and role.text != name_val:
+                            role_val = role.text
+                    family_member = {'name': name_val, 'role': role_val}
+                    family.append(family_member)
+            # -----------------------------------------------------------------------------
+            # friends url
 
-                        # print(self.getAboutData())
-                        time.sleep(5)
-        except TypeError:
-            print('Nieprawidłowe dane do logowania')
+            print(person)
+            people.append(person)
+        return people
+
+                # about_content = str(cont, encoding='utf-8')
+                # with open('about.txt', 'wb') as about_file:
+                #     about_file.write(bytes(about_content, encoding='utf-8'))
+                #
+                # print(self.getAboutData())
+                # time.sleep(5)
+
 
 
 
@@ -269,40 +445,180 @@ class FacebookPublicAccountParser:
                                 if selector.find('href') != -1:
                                     return base_url + self.getUrlFromHref(selector)
 
+    def getProfileContent(self, url):
+        try:
+            options = Options()
+            options.headless = True
+            browser = webdriver.Firefox()
+            browser.get('https://m.facebook.com/login.php')
+            time.sleep(5)
+            submit = browser.find_element_by_id("accept-cookie-banner-label")
+            submit.click()
+            time.sleep(10)
+            email = browser.find_element_by_id('m_login_email')
+            password = browser.find_element_by_id('m_login_password')
+            email.send_keys(self.email)
+            password.send_keys(self.password)
+            submit = browser.find_element_by_name('login')
+            submit.click()
+            browser.f
+            time.sleep(10)
+            not_now = browser.find_element_by_class_name('_2pii')
+            not_now.click()
+            time.sleep(7)
+            browser.get(url)
+            time.sleep(10)
+            content = browser.execute_script("return document.documentElement.outerHTML;")
+            browser.close()
+            return content
+        except:
+            print('Błąd wyszukiwania za pomocą webdrivera\n')
+
     def getFriendsContent(self, url):
-        options = Options()
-        options.headless = True
-        browser = webdriver.Firefox(options=options)
-        browser.get('https://m.facebook.com/login.php')
-        browser.execute_script("window.scrollTo(0,document.body.scrollHeight)")
-        time.sleep(3)
-        submit = browser.find_element_by_id("accept-cookie-banner-label")
-        submit.click()
-        time.sleep(2)
-        email = browser.find_element_by_id('m_login_email')
-        password = browser.find_element_by_id('m_login_password')
-        email.send_keys(self.email)
-        password.send_keys(self.password)
-        submit = browser.find_element_by_name('login')
-        submit.click()
-        time.sleep(10)
-        not_now = browser.find_element_by_class_name('_2pii')
-        not_now.click()
-        time.sleep(7)
-        browser.get(url)
-        last_height = browser.execute_script('return document.body.scrollHeight')
-        browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
-        time.sleep(5)
-        new_height = browser.execute_script('return document.body.scrollHeight')
-        while new_height != last_height:
-            last_height = new_height
+        try:
+            options = Options()
+            options.headless = True
+            browser = webdriver.Firefox()
+            browser.get('https://m.facebook.com/login.php')
+            time.sleep(5)
+            submit = browser.find_element_by_id("accept-cookie-banner-label")
+            submit.click()
+            time.sleep(10)
+            email = browser.find_element_by_id('m_login_email')
+            password = browser.find_element_by_id('m_login_password')
+            email.send_keys(self.email)
+            password.send_keys(self.password)
+            submit = browser.find_element_by_name('login')
+            submit.click()
+            time.sleep(10)
+            not_now = browser.find_element_by_class_name('_2pii')
+            not_now.click()
+            time.sleep(7)
+            browser.get(url)
+            last_height = browser.execute_script('return document.body.scrollHeight')
             browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
             time.sleep(5)
             new_height = browser.execute_script('return document.body.scrollHeight')
+            while new_height != last_height:
+                last_height = new_height
+                browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+                time.sleep(5)
+                new_height = browser.execute_script('return document.body.scrollHeight')
 
-        content = browser.execute_script("return document.documentElement.outerHTML;")
-        browser.close()
-        return content
+            content = browser.execute_script("return document.documentElement.outerHTML;")
+            browser.close()
+            return content
+        except:
+            return ''
+
+    def getAboutContent(self, url):
+        try:
+            options = Options()
+            options.headless = True
+            browser = webdriver.Firefox()
+            browser.get('https://m.facebook.com/login.php')
+            time.sleep(5)
+            submit = browser.find_element_by_id("accept-cookie-banner-label")
+            submit.click()
+            time.sleep(10)
+            email = browser.find_element_by_id('m_login_email')
+            password = browser.find_element_by_id('m_login_password')
+            email.send_keys(self.email)
+            password.send_keys(self.password)
+            submit = browser.find_element_by_name('login')
+            submit.click()
+            time.sleep(10)
+            not_now = browser.find_element_by_class_name('_2pii')
+            not_now.click()
+            time.sleep(7)
+            browser.get(url)
+            last_height = browser.execute_script('return document.body.scrollHeight')
+            browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+            time.sleep(5)
+            new_height = browser.execute_script('return document.body.scrollHeight')
+            while new_height != last_height:
+                last_height = new_height
+                browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+                time.sleep(5)
+                new_height = browser.execute_script('return document.body.scrollHeight')
+
+            content = browser.execute_script("return document.documentElement.outerHTML;")
+            browser.close()
+            return content
+        except:
+            return ''
+
+    def getAllContentsByWebdriver(self, links):
+        general_urls = []
+        about_contents = []
+        friends_contents = []
+        try:
+            options = Options()
+            options.headless = True
+            browser = webdriver.Firefox()
+            browser.get('https://m.facebook.com/login.php')
+            time.sleep(5)
+            submit = browser.find_element_by_id("accept-cookie-banner-label")
+            submit.click()
+            time.sleep(10)
+            email = browser.find_element_by_id('m_login_email')
+            password = browser.find_element_by_id('m_login_password')
+            email.send_keys(self.email)
+            password.send_keys(self.password)
+            submit = browser.find_element_by_name('login')
+            submit.click()
+            time.sleep(10)
+            not_now = browser.find_element_by_class_name('_2pii')
+            not_now.click()
+            time.sleep(7)
+            for link in links:
+                browser.get(link)
+                time.sleep(7)
+                last_height = browser.execute_script('return document.body.scrollHeight')
+                browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+                time.sleep(5)
+                new_height = browser.execute_script('return document.body.scrollHeight')
+                while new_height != last_height:
+                    last_height = new_height
+                    browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+                    time.sleep(5)
+                    new_height = browser.execute_script('return document.body.scrollHeight')
+                content = browser.execute_script("return document.documentElement.outerHTML;")
+                general_urls.append(content)
+                with open('main_page.txt', 'wb') as tmp_file:
+                    tmp_file.write(bytes(content, encoding='utf-8'))
+                about = self.getAboutUrl('main_page.txt')
+                friends = self.getFriendsUrl('main_page.txt')
+                time.sleep(10)
+                browser.get(about)
+                last_height = browser.execute_script('return document.body.scrollHeight')
+                browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+                time.sleep(5)
+                new_height = browser.execute_script('return document.body.scrollHeight')
+                while new_height != last_height:
+                    last_height = new_height
+                    browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+                    time.sleep(5)
+                    new_height = browser.execute_script('return document.body.scrollHeight')
+                content = browser.execute_script("return document.documentElement.outerHTML;")
+                about_contents.append(about)
+                time.sleep(5)
+                browser.get(friends)
+                last_height = browser.execute_script('return document.body.scrollHeight')
+                browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+                time.sleep(5)
+                new_height = browser.execute_script('return document.body.scrollHeight')
+                while new_height != last_height:
+                    last_height = new_height
+                    browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+                    time.sleep(5)
+                    new_height = browser.execute_script('return document.body.scrollHeight')
+                content = browser.execute_script("return document.documentElement.outerHTML;")
+                friends_contents.append(content)
+                time.sleep(10)
+            return general_urls, about_contents, friends_contents
+        except:
+            return [], [], []
 
     def getAboutData(self, filename):
         education = []
@@ -313,12 +629,3 @@ class FacebookPublicAccountParser:
         pass
 
 
-
-
-
-if __name__ == '__main__':
-    fb = FacebookPublicAccountParser()
-    fb.loggingSearch('Przemek Bednara')
-    # url = fb.getFriendsUrl('0.txt')
-    # cont = fb.getFriendsContent(url)
-    # print(fb.getFriendsList(cont))

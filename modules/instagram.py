@@ -78,7 +78,3 @@ class InstagramSearcher:
             self.peopleFound.append(osoba)
             j += 1
 
-
-insts = InstagramSearcher()
-insts.search('Jakub Bomba')
-print(insts.peopleFound)
