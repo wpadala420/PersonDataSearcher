@@ -4,12 +4,12 @@ import credentials
 
 if __name__ == '__main__':
     name = input('Type name and surname\n')
-    # print('FACEBOOK SEARCHING...')
-    # facebook_result = search.facebook_search(name, credentials.email, credentials.password)
-    # print('FACEBOOK SEARCHING FINISHED')
-    # print('SEARCHING INSTAGRAM')
-    # instagram_result = search.instagram_search(name)
-    # print('SEARCHING INSTAGRAM FINISHED')
+    print('FACEBOOK SEARCHING...')
+    facebook_result = search.facebook_search(name, credentials.email, credentials.password)
+    print('FACEBOOK SEARCHING FINISHED')
+    print('SEARCHING INSTAGRAM')
+    instagram_result = search.instagram_search(name)
+    print('SEARCHING INSTAGRAM FINISHED')
     print('SEARCHING TWITTER')
     twitter_result = search.twitter_search(name)
     for twiter in twitter_result:
