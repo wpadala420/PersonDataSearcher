@@ -8,7 +8,8 @@ import time
 import re
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
-
+import json
+import os
 
 class FacebookPublicAccountParser:
 
@@ -115,6 +116,31 @@ class FacebookPublicAccountParser:
                 friends.append(elem.text.split('Zaproszenie wysłane')[0])
         return friends
 
+    def getUserNameFromLink(self, link):
+        if link.find('.com/') != -1:
+            username = ''
+            stop = ''
+            start = link.find('.com/') + 5
+            if link.find('?') != -1:
+                stop = link.find('?')
+            else:
+                stop = len(link) - 1
+            for i in range(start, stop):
+                username = username + link[i]
+            return username
+        elif link.find('.pl/') != -1:
+            username = ''
+            stop = ''
+            start = link.find('.pl/') + 4
+            if link.find('?') != -1:
+                stop = link.find('?')
+            else:
+                stop = len(link) - 1
+            for i in range(start, stop):
+                username = username + link[i]
+            return username
+        else:
+            return ''
 
     def loggingSearch(self, name):
         people = []
@@ -289,17 +315,22 @@ class FacebookPublicAccountParser:
                 new_links.append(link)
         links = new_links
         count = 0
-
+        usernames = []
+        browser = self.loginSelenium()
         if b:
             general_contents = []
             about_contents = []
             friends_contents = []
+            profile_photos_urls = []
+            profile_photos_direct_urls = []
             if a is None:
                 a = ''
             if b is None:
                 b = ''
             if c is None:
                 c = ''
+
+
             for link in links:
                 print(a + ':' + b + ':' + c)
                 new_sess = session.get(link)
@@ -307,15 +338,25 @@ class FacebookPublicAccountParser:
                 var_t = new_sess.text
                 str_var = str(var, encoding='utf-8')
                 general_contents.append(str_var)
+
                 with open('main_page.txt', 'wb') as tmp_file:
                     tmp_file.write(bytes(str_var, encoding='utf-8'))
+                username = self.getUserNameFromLink(link)
+                usernames.append(username)
+                profile_photo_url = self.getProfilePhotoUrl('main_page.txt')
+                profile_photos_urls.append(profile_photo_url)
+                profile_photo_content = self.getProfilePhotoContent(browser, profile_photo_url)
+                direct_url = self.getProfilePhotoDirectUrl(profile_photo_content)
+                profile_photos_direct_urls.append(direct_url)
                 friends_url = self.getFriendsUrl('main_page.txt')
-                friends_content = self.getFriendsContent(friends_url)
+                friends_content = self.getFriendsContent(browser, friends_url)
                 friends_contents.append(friends_content)
                 about_url = self.getAboutUrl('main_page.txt')
                 if(about_url is not None):
                     about_content = str(session.get(about_url).content, encoding='utf-8')
                     about_contents.append(about_content)
+            if browser is not None:
+                browser.close()
             for i in range(0, len(general_contents)):
                 general = None
                 about = None
@@ -332,21 +373,56 @@ class FacebookPublicAccountParser:
                     friends = friends_contents[i]
                 else:
                     friends = None
-                data = {'general': general, 'about': about, 'friends': friends}
+                profile_photo_url = ''
+                profile_photo_direct_url = ''
+                if profile_photo_url is None:
+                    profile_photo_url = ''
+                else:
+                    if i < len(profile_photos_urls):
+                        profile_photo_url = profile_photos_urls[i]
+                if i < len(profile_photos_direct_urls):
+                    profile_photo_direct_url = profile_photos_direct_urls[i]
+                data = {'general': general, 'about': about, 'friends': friends, 'profile_photo_url' : profile_photo_url, 'profile_photo_direct_url': profile_photo_direct_url}
                 parse_data.append(data)
         else:
-            general_contents, about_contents, friends_contents = self.getAllContentsByWebdriver(links)
+            general_contents, about_contents, friends_contents, profile_photo_urls = self.getAllContentsByWebdriver(browser, links)
+            for link in links:
+                usernames.append(self.getUserNameFromLink(link))
             for i in range(0, len(general_contents)):
-                data = {'general': general_contents[i], 'about': about_contents[i], 'friends': friends_contents[i]}
+                profile_photo_direct_url = ''
+                if profile_photo_urls[i] is not None and profile_photo_urls[i] != '':
+                    profile_photo_content = self.getProfilePhotoContent(browser, profile_photo_urls[i])
+                    direct_url = self.getProfilePhotoDirectUrl(profile_photo_content)
+                    profile_photo_direct_url = direct_url
+                data = {'general': general_contents[i], 'about': about_contents[i], 'friends': friends_contents[i], 'profile_photo_url': profile_photo_urls[i], 'profile_photo_direct_url': direct_url}
                 parse_data.append(data)
-
+        user_iter = 0
         for link in parse_data:
             person = {}
             person['name'] = name_val
             person['surname'] = surname_val
             person['facebook'] = {}
             person['facebook']['friends'] = self.getFriendsList(link['friends'])
+            if user_iter < len(usernames):
+                person['facebook']['username'] = usernames[user_iter]
 
+            else:
+                person['facebook']['username'] = ''
+            directory_name = ''
+            if person['facebook']['username'] != '':
+                directory_name = person['facebook']['username']
+            else:
+                directory_name = person['name'] + '_' + person['surname'] + user_iter
+            user_iter += 1
+            person['facebook']['photos_directory'] = 'tmp/facebook/' + directory_name
+
+            if 'profile_photo_direct_url' in link:
+                person['facebook']['profile_photo_direct_url'] = link['profile_photo_direct_url']
+            else:
+                person['facebook']['profile_photo_direct_url'] = ''
+
+            if person['facebook']['profile_photo_direct_url'] != '':
+                person['facebook']['profile_photo_path'] = self.downloadPhoto(person['facebook']['photos_directory'], person['facebook']['profile_photo_direct_url'], 'profile_photo.jpg' )
             # ---------------------------------------------------------------------
             about = self.getAboutUrl('main_page.txt')
             # print(about)
@@ -448,7 +524,13 @@ class FacebookPublicAccountParser:
                 # time.sleep(5)
 
 
-
+    def downloadPhoto(self, directory, url, filename):
+        if os.path.isdir(directory) is False:
+            os.mkdir(directory)
+        response = requests.get(url)
+        with open(directory + '/' + filename, 'wb') as photo:
+            photo.write(response.content)
+        return directory + '/' + filename
 
     def getAboutUrl(self, filename):
         base_url = 'https://m.facebook.com'
@@ -472,36 +554,50 @@ class FacebookPublicAccountParser:
                                 if selector.find('href') != -1:
                                     return base_url + self.getUrlFromHref(selector)
 
-    def getProfileContent(self, url):
+    def getProfilePhotoUrl(self, filename):
+        base_url = 'https://m.facebook.com'
+        with open(filename, 'rb') as data:
+            for line in data:
+                if str(line, encoding='utf-8').find('photo.php?') != -1:
+                    for split_line in str(line, encoding='utf-8').split('><'):
+                        if split_line.find('photo.php?') != -1 and split_line.find('href="/') != -1:
+                            for selector in split_line.split(' '):
+                                if selector.find('href') != -1:
+                                    return base_url + self.getUrlFromHref(selector)
+
+    def getProfilePhotoContent(self, browser, url):
         try:
-            options = Options()
-            options.headless = True
-            browser = webdriver.Firefox()
-            browser.get('https://m.facebook.com/login.php')
-            time.sleep(5)
-            submit = browser.find_element_by_id("accept-cookie-banner-label")
-            submit.click()
-            time.sleep(10)
-            email = browser.find_element_by_id('m_login_email')
-            password = browser.find_element_by_id('m_login_password')
-            email.send_keys(self.email)
-            password.send_keys(self.password)
-            submit = browser.find_element_by_name('login')
-            submit.click()
-            browser.f
-            time.sleep(10)
-            not_now = browser.find_element_by_class_name('_2pii')
-            not_now.click()
             time.sleep(7)
             browser.get(url)
             time.sleep(10)
             content = browser.execute_script("return document.documentElement.outerHTML;")
-            browser.close()
+            return content
+        except:
+            return ''
+
+    def getProfilePhotoDirectUrl(self, content):
+        soup = bs4.BeautifulSoup(content, 'html.parser')
+        rootcontainers = soup.find_all('div', {'id': 'rootcontainer'})
+        for rcontainer in rootcontainers:
+            img = rcontainer.find_all('i')
+            for i in img:
+                if i['data-store'] is not None and i['data-store'].find('"imgsrc":') != -1:
+                    data_json = json.loads(i['data-store'])
+                    raw_url = str(data_json['imgsrc'])
+                    return raw_url
+
+
+    def getProfileContent(self, browser, url):
+        try:
+            time.sleep(7)
+            browser.get(url)
+            time.sleep(10)
+            content = browser.execute_script("return document.documentElement.outerHTML;")
             return content
         except:
             print('Błąd wyszukiwania za pomocą webdrivera\n')
 
-    def getFriendsContent(self, url):
+    def loginSelenium(self):
         try:
             options = Options()
             options.headless = True
@@ -521,42 +617,12 @@ class FacebookPublicAccountParser:
             not_now = browser.find_element_by_class_name('_2pii')
             not_now.click()
             time.sleep(7)
-            browser.get(url)
-            last_height = browser.execute_script('return document.body.scrollHeight')
-            browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
-            time.sleep(5)
-            new_height = browser.execute_script('return document.body.scrollHeight')
-            while new_height != last_height:
-                last_height = new_height
-                browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
-                time.sleep(5)
-                new_height = browser.execute_script('return document.body.scrollHeight')
-
-            content = browser.execute_script("return document.documentElement.outerHTML;")
-            browser.close()
-            return content
+            return browser
         except:
-            return ''
+            return None
 
-    def getAboutContent(self, url):
+    def getFriendsContent(self, browser, url):
         try:
-            options = Options()
-            options.headless = True
-            browser = webdriver.Firefox()
-            browser.get('https://m.facebook.com/login.php')
-            time.sleep(5)
-            submit = browser.find_element_by_id("accept-cookie-banner-label")
-            submit.click()
-            time.sleep(10)
-            email = browser.find_element_by_id('m_login_email')
-            password = browser.find_element_by_id('m_login_password')
-            email.send_keys(self.email)
-            password.send_keys(self.password)
-            submit = browser.find_element_by_name('login')
-            submit.click()
-            time.sleep(10)
-            not_now = browser.find_element_by_class_name('_2pii')
-            not_now.click()
             time.sleep(7)
             browser.get(url)
             last_height = browser.execute_script('return document.body.scrollHeight')
@@ -570,33 +636,35 @@ class FacebookPublicAccountParser:
                 new_height = browser.execute_script('return document.body.scrollHeight')
 
             content = browser.execute_script("return document.documentElement.outerHTML;")
-            browser.close()
             return content
         except:
             return ''
 
-    def getAllContentsByWebdriver(self, links):
+    def getAboutContent(self, browser,  url):
+        try:
+            time.sleep(7)
+            browser.get(url)
+            last_height = browser.execute_script('return document.body.scrollHeight')
+            browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+            time.sleep(5)
+            new_height = browser.execute_script('return document.body.scrollHeight')
+            while new_height != last_height:
+                last_height = new_height
+                browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+                time.sleep(5)
+                new_height = browser.execute_script('return document.body.scrollHeight')
+
+            content = browser.execute_script("return document.documentElement.outerHTML;")
+            return content
+        except:
+            return ''
+
+    def getAllContentsByWebdriver(self, browser, links):
         general_urls = []
         about_contents = []
         friends_contents = []
+        profile_photo_urls = []
         try:
-            options = Options()
-            options.headless = True
-            browser = webdriver.Firefox()
-            browser.get('https://m.facebook.com/login.php')
-            time.sleep(5)
-            submit = browser.find_element_by_id("accept-cookie-banner-label")
-            submit.click()
-            time.sleep(10)
-            email = browser.find_element_by_id('m_login_email')
-            password = browser.find_element_by_id('m_login_password')
-            email.send_keys(self.email)
-            password.send_keys(self.password)
-            submit = browser.find_element_by_name('login')
-            submit.click()
-            time.sleep(10)
-            not_now = browser.find_element_by_class_name('_2pii')
-            not_now.click()
             time.sleep(7)
             for link in links:
                 browser.get(link)
@@ -614,6 +682,10 @@ class FacebookPublicAccountParser:
                 general_urls.append(content)
                 with open('main_page.txt', 'wb') as tmp_file:
                     tmp_file.write(bytes(content, encoding='utf-8'))
+                profile_photo_url = self.getProfilePhotoUrl('main_page.txt')
+                if profile_photo_url is None:
+                    profile_photo_url = ''
+                profile_photo_urls.append(profile_photo_url)
                 about = self.getAboutUrl('main_page.txt')
                 friends = self.getFriendsUrl('main_page.txt')
                 time.sleep(10)
@@ -643,7 +715,7 @@ class FacebookPublicAccountParser:
                 content = browser.execute_script("return document.documentElement.outerHTML;")
                 friends_contents.append(content)
                 time.sleep(10)
-            return general_urls, about_contents, friends_contents
+            return general_urls, about_contents, friends_contents, profile_photo_urls
         except:
             return [], [], []
 
@@ -654,5 +726,6 @@ class FacebookPublicAccountParser:
             for line in data:
                 pass
         pass
+
 
 

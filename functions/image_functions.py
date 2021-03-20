@@ -72,7 +72,7 @@ def get_location_info(filename):
                 return geocoder.reverse("%s,%s" % coords)
 
 
-def comapre_faces(known_image_url, unknown_image_url):
+def compare_faces(known_image_url, unknown_image_url):
     known_image = face_recognition.load_image_file(known_image_url)
     unknown_image = face_recognition.load_image_file(unknown_image_url)
     known_encodings = face_recognition.face_encodings(known_image)
