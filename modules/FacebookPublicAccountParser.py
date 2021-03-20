@@ -10,6 +10,7 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 import json
 import os
+from functions import image_functions
 
 class FacebookPublicAccountParser:
 
@@ -317,6 +318,8 @@ class FacebookPublicAccountParser:
         count = 0
         usernames = []
         browser = self.loginSelenium()
+        if b is None:
+            b = ''
         if b:
             general_contents = []
             about_contents = []
@@ -332,17 +335,19 @@ class FacebookPublicAccountParser:
 
 
             for link in links:
-                print(a + ':' + b + ':' + c)
-                new_sess = session.get(link)
-                var = new_sess.content
-                var_t = new_sess.text
-                str_var = str(var, encoding='utf-8')
+                # print(a + ':' + b + ':' + c)
+                # new_sess = session.get(link)
+                # var = new_sess.content
+                # var_t = new_sess.text
+                # str_var = str(var, encoding='utf-8')
+                str_var = self.getProfileContent(browser, link)
                 general_contents.append(str_var)
-
                 with open('main_page.txt', 'wb') as tmp_file:
                     tmp_file.write(bytes(str_var, encoding='utf-8'))
                 username = self.getUserNameFromLink(link)
                 usernames.append(username)
+                # if link.find('emil.wrobel.90') != -1:
+                #     print('tak')
                 profile_photo_url = self.getProfilePhotoUrl('main_page.txt')
                 profile_photos_urls.append(profile_photo_url)
                 profile_photo_content = self.getProfilePhotoContent(browser, profile_photo_url)
@@ -353,10 +358,9 @@ class FacebookPublicAccountParser:
                 friends_contents.append(friends_content)
                 about_url = self.getAboutUrl('main_page.txt')
                 if(about_url is not None):
-                    about_content = str(session.get(about_url).content, encoding='utf-8')
+                    about_content = self.getAboutContent(browser, about_url)
                     about_contents.append(about_content)
-            if browser is not None:
-                browser.close()
+
             for i in range(0, len(general_contents)):
                 general = None
                 about = None
@@ -382,7 +386,7 @@ class FacebookPublicAccountParser:
                         profile_photo_url = profile_photos_urls[i]
                 if i < len(profile_photos_direct_urls):
                     profile_photo_direct_url = profile_photos_direct_urls[i]
-                data = {'general': general, 'about': about, 'friends': friends, 'profile_photo_url' : profile_photo_url, 'profile_photo_direct_url': profile_photo_direct_url}
+                data = {'general': general, 'about': about, 'friends': friends, 'profile_photo_url': profile_photo_url, 'profile_photo_direct_url': profile_photo_direct_url}
                 parse_data.append(data)
         else:
             general_contents, about_contents, friends_contents, profile_photo_urls = self.getAllContentsByWebdriver(browser, links)
@@ -422,7 +426,7 @@ class FacebookPublicAccountParser:
                 person['facebook']['profile_photo_direct_url'] = ''
 
             if person['facebook']['profile_photo_direct_url'] != '':
-                person['facebook']['profile_photo_path'] = self.downloadPhoto(person['facebook']['photos_directory'], person['facebook']['profile_photo_direct_url'], 'profile_photo.jpg' )
+                person['facebook']['profile_photo_path'] = image_functions.download_photo(person['facebook']['photos_directory'], person['facebook']['profile_photo_direct_url'], 'profile_photo.jpg' )
             # ---------------------------------------------------------------------
             about = self.getAboutUrl('main_page.txt')
             # print(about)
@@ -514,6 +518,7 @@ class FacebookPublicAccountParser:
 
             print(person)
             people.append(person)
+        browser.close()
         return people
 
                 # about_content = str(cont, encoding='utf-8')
@@ -524,13 +529,7 @@ class FacebookPublicAccountParser:
                 # time.sleep(5)
 
 
-    def downloadPhoto(self, directory, url, filename):
-        if os.path.isdir(directory) is False:
-            os.mkdir(directory)
-        response = requests.get(url)
-        with open(directory + '/' + filename, 'wb') as photo:
-            photo.write(response.content)
-        return directory + '/' + filename
+
 
     def getAboutUrl(self, filename):
         base_url = 'https://m.facebook.com'
@@ -558,20 +557,27 @@ class FacebookPublicAccountParser:
         base_url = 'https://m.facebook.com'
         with open(filename, 'rb') as data:
             for line in data:
-                if str(line, encoding='utf-8').find('photo.php?') != -1:
-                    for split_line in str(line, encoding='utf-8').split('><'):
-                        if split_line.find('photo.php?') != -1 and split_line.find('href="/') != -1:
-                            for selector in split_line.split(' '):
-                                if selector.find('href') != -1:
+                if str(line, encoding='utf-8').find('photo.php?') != -1 and str(line, encoding='utf-8').find('profile picture') != -1:
+                    split = str(line, encoding='utf-8').split('><div id')
+                    for split_line in split:
+                        if split_line.find('photo.php?') != -1 and split_line.find('href="/') != -1 and split_line.find('profile picture') != -1:
+                            selectors = split_line.split(' ')
+                            previous = selectors[0]
+                            for selector in selectors:
+                                if selector.find('href') != -1 and previous.find('cover-photo') == -1:
                                     return base_url + self.getUrlFromHref(selector)
+                                previous = selector
 
     def getProfilePhotoContent(self, browser, url):
         try:
-            time.sleep(7)
-            browser.get(url)
-            time.sleep(10)
-            content = browser.execute_script("return document.documentElement.outerHTML;")
-            return content
+            if url is not None:
+                time.sleep(7)
+                browser.get(url)
+                time.sleep(10)
+                content = browser.execute_script("return document.documentElement.outerHTML;")
+                return content
+            else:
+                return ''
         except:
             return ''
 
@@ -581,10 +587,14 @@ class FacebookPublicAccountParser:
         for rcontainer in rootcontainers:
             img = rcontainer.find_all('i')
             for i in img:
-                if i['data-store'] is not None and i['data-store'].find('"imgsrc":') != -1:
-                    data_json = json.loads(i['data-store'])
-                    raw_url = str(data_json['imgsrc'])
-                    return raw_url
+                try:
+                    if i['data-store'] is not None and i['data-store'].find('"imgsrc":') != -1:
+                        data_json = json.loads(i['data-store'])
+                        raw_url = str(data_json['imgsrc'])
+                        return raw_url
+                except:
+                    return ''
+        return ''
 
 
     def getProfileContent(self, browser, url):
@@ -621,22 +631,27 @@ class FacebookPublicAccountParser:
         except:
             return None
 
+
+
     def getFriendsContent(self, browser, url):
         try:
-            time.sleep(7)
-            browser.get(url)
-            last_height = browser.execute_script('return document.body.scrollHeight')
-            browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
-            time.sleep(5)
-            new_height = browser.execute_script('return document.body.scrollHeight')
-            while new_height != last_height:
-                last_height = new_height
+            if url is not None:
+                time.sleep(7)
+                browser.get(url)
+                last_height = browser.execute_script('return document.body.scrollHeight')
                 browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
                 time.sleep(5)
                 new_height = browser.execute_script('return document.body.scrollHeight')
+                while new_height != last_height:
+                    last_height = new_height
+                    browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+                    time.sleep(5)
+                    new_height = browser.execute_script('return document.body.scrollHeight')
 
-            content = browser.execute_script("return document.documentElement.outerHTML;")
-            return content
+                content = browser.execute_script("return document.documentElement.outerHTML;")
+                return content
+            else:
+                return ''
         except:
             return ''
 

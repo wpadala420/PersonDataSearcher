@@ -52,8 +52,10 @@ class TwitterSearch:
             if 'profile_image_url' in person.twitter:
                 print(person.twitter['profile_image_url'])
                 try:
-                    functions.image_functions.download_image(person.twitter['profile_image_url'], person.twitter['nickname'] + '.jpg')
-                    print(functions.image_functions.get_location_info(person.twitter['nickname'] + '.jpg'))
+                    url = 'tmp/twitter/' + person.twitter['nickname']
+                    path = functions.image_functions.download_photo(url, person.twitter['profile_image_url'], 'profile.jpg')
+                    osoba.twitter['profile_img_path'] = path
+                    # print(functions.image_functions.get_location_info(person.twitter['nickname'] + '.jpg'))
                 except:
                     pass
 

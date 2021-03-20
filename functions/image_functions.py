@@ -4,6 +4,7 @@ import requests
 from geopy.geocoders import Here
 import shutil
 import face_recognition
+import os
 
 HERE_APIKEY = 'iRjYiufvBGmhk6OvJY0lPcVtvF7aFAe6jTgpXEvO8-s'
 
@@ -87,4 +88,14 @@ def compare_faces(known_image_url, unknown_image_url):
     return False
 
 
+def download_photo(directory, url, filename):
+    if url is not None and url != '':
+        if os.path.isdir(directory) is False:
+            os.mkdir(directory)
+        response = requests.get(url)
+        with open(directory + '/' + filename, 'wb') as photo:
+            photo.write(response.content)
+        return directory + '/' + filename
+    else:
+        return ''
 
