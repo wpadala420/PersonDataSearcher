@@ -8,11 +8,7 @@ def facebook_search(name, email, password):
 
 def instagram_search(name):
     insta = instagram.InstagramSearcher()
-    try:
-        insta.search(name)
-    except Exception:
-        print(Exception)
-
+    insta.search(name)
     return insta.peopleFound
 
 

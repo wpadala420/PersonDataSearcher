@@ -3,6 +3,7 @@ from PIL.ExifTags import TAGS, GPSTAGS
 import requests
 from geopy.geocoders import Here
 import shutil
+import face_recognition
 
 HERE_APIKEY = 'iRjYiufvBGmhk6OvJY0lPcVtvF7aFAe6jTgpXEvO8-s'
 
@@ -71,4 +72,19 @@ def get_location_info(filename):
                 return geocoder.reverse("%s,%s" % coords)
 
 
-print(get_exif('/home/wojciech/osint/PersonDataSearcher/tmp/fbmeta.jpg'))
+def comapre_faces(known_image_url, unknown_image_url):
+    known_image = face_recognition.load_image_file(known_image_url)
+    unknown_image = face_recognition.load_image_file(unknown_image_url)
+    known_encodings = face_recognition.face_encodings(known_image)
+    unknown_encodings = face_recognition.face_encodings(unknown_image)
+    if len(known_encodings) > 0 and len(unknown_encodings) > 0:
+        for known in known_encodings:
+            for unknown in unknown_encodings:
+                results = face_recognition.compare_faces([known], unknown)
+                for result in results:
+                    if bool(result) is True:
+                        return True
+    return False
+
+
+

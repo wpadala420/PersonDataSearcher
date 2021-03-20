@@ -109,7 +109,10 @@ class FacebookPublicAccountParser:
         friends_soup = bs4.BeautifulSoup(content, 'html.parser')
         elems = friends_soup.find_all('div', {'data-sigil': 'undoable-action'})
         for elem in elems:
-            friends.append(elem.text.split('Request sent')[0])
+            if elem.text.find('Request sent') != -1:
+                friends.append(elem.text.split('Request sent')[0])
+            else:
+                friends.append(elem.text.split('Zaproszenie wysłane')[0])
         return friends
 
 
@@ -291,6 +294,12 @@ class FacebookPublicAccountParser:
             general_contents = []
             about_contents = []
             friends_contents = []
+            if a is None:
+                a = ''
+            if b is None:
+                b = ''
+            if c is None:
+                c = ''
             for link in links:
                 print(a + ':' + b + ':' + c)
                 new_sess = session.get(link)
@@ -304,10 +313,26 @@ class FacebookPublicAccountParser:
                 friends_content = self.getFriendsContent(friends_url)
                 friends_contents.append(friends_content)
                 about_url = self.getAboutUrl('main_page.txt')
-                about_content = str(session.get(about_url).content, encoding='utf-8')
-                about_contents.append(about_content)
+                if(about_url is not None):
+                    about_content = str(session.get(about_url).content, encoding='utf-8')
+                    about_contents.append(about_content)
             for i in range(0, len(general_contents)):
-                data = {'general': general_contents[i], 'about': about_contents[i], 'friends': friends_contents[i]}
+                general = None
+                about = None
+                friends = None
+                if i < len(general_contents):
+                    general = general_contents[i]
+                else:
+                    general = None
+                if i < len(about_contents):
+                    about = about_contents[i]
+                else:
+                    about = None
+                if i < len(friends_contents):
+                    friends = friends_contents[i]
+                else:
+                    friends = None
+                data = {'general': general, 'about': about, 'friends': friends}
                 parse_data.append(data)
         else:
             general_contents, about_contents, friends_contents = self.getAllContentsByWebdriver(links)
@@ -327,13 +352,15 @@ class FacebookPublicAccountParser:
             # print(about)
             time.sleep(2)
             cont = None
+            if 'about' in link and link['about'] is None:
+                link['about'] = ''
             soup2 = bs4.BeautifulSoup(link['about'], 'html.parser')
             edu = soup2.find_all('div', {'id': 'education'})
             # --------------------------------------------------------------------
             # education
             edu_names = []
             durations = []
-            texts = soup2.a.contents
+            # texts = soup2.a.contents
             for edu_tag in edu:
                 tags_ = edu_tag.find_all('div', {'class': 'experience'})
                 for t in tags_:

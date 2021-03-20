@@ -30,7 +30,6 @@ class InstagramSearcher:
             'https://www.instagram.com/web/search/topsearch/?context=blended&query={}-{}&rank_token=0.6093586799873352&include_reel=true'.format(name.split(' ')[0], name.split(' ')[1])).json()
         j = 0
         for i in data['users']:
-            print('GOT IT\n')
             osoba = Person()
             osoba.setName(i['user']['full_name'].split(' ')[0])
             if len(i['user']['full_name'].split(' ')) > 1:
@@ -52,28 +51,33 @@ class InstagramSearcher:
             #     print('wieksze')
             osoba.instagram['posts'] = []
             if i['user']['is_private'] is False:
-                ip = Instaloader()
-                profile = Profile.from_username(ip.context, osoba.instagram['login'])
-                for p in profile.get_posts():
-                    post = {}
-                    post['date'] = str(p.date)
-                    post['url'] = str(p.url)
-                    post['users tagged'] = str(p.tagged_users)
-                    post['hashtags'] =str(p.caption_hashtags)
-                    if p.location:
-                        post['localization'] =str(p.location)
-                    if p.location:
-                        post['localization'] = str(p.location.name)
+                try:
+                    ip = Instaloader()
+                    profile = Profile.from_username(ip.context, osoba.instagram['login'])
+                    for p in profile.get_posts():
+                        post = {}
+                        post['date'] = str(p.date)
+                        post['url'] = str(p.url)
+                        post['users tagged'] = str(p.tagged_users)
+                        post['hashtags'] = str(p.caption_hashtags)
+                        if p.location:
+                            post['localization'] = str(p.location)
+                        if p.location:
+                            post['localization'] = str(p.location.name)
 
-                    osoba.instagram['posts'].append(post)
-                    functions.image_functions.download_image(p.url, '{}.jpg'.format(osoba.instagram['login'] + str(osoba.photosNumber)))
-                    print(functions.image_functions.get_location_info('{}.jpg'.format(osoba.instagram['login'] + str(osoba.photosNumber))))
-                    # photo2 = open(
-                    #      '{} {} {}/{}.jpg'.format(osoba.name, osoba.surname, str(j), str(osoba.photosNumber)), 'wb')
-                    # photo2.write(requests.get(p.url).content)
-                    # photo2.close()
-                    # osoba.photos.append(str(photo2))
-                    osoba.photosNumber += 1
+                        osoba.instagram['posts'].append(post)
+                        functions.image_functions.download_image(p.url, '{}.jpg'.format(
+                            osoba.instagram['login'] + str(osoba.photosNumber)))
+                        print(functions.image_functions.get_location_info(
+                            '{}.jpg'.format(osoba.instagram['login'] + str(osoba.photosNumber))))
+                        # photo2 = open(
+                        #      '{} {} {}/{}.jpg'.format(osoba.name, osoba.surname, str(j), str(osoba.photosNumber)), 'wb')
+                        # photo2.write(requests.get(p.url).content)
+                        # photo2.close()
+                        # osoba.photos.append(str(photo2))
+                        osoba.photosNumber += 1
+                except:
+                    pass
                 time.sleep(2)
             self.peopleFound.append(osoba)
             j += 1
