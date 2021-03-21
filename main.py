@@ -1,23 +1,28 @@
 from functions import search, file_functions, matching_functions
 import credentials
-
+import time
+from datetime import datetime
 
 if __name__ == '__main__':
     file_functions.clear_temportary_files('tmp/facebook')
     file_functions.clear_temportary_files('tmp/instagram')
     file_functions.clear_temportary_files('tmp/twitter')
     name = input('Type name and surname\n')
+    print('START:' + datetime.now().strftime("%H:%M:%S"))
     print('FACEBOOK SEARCHING...')
     facebook_result = search.facebook_search(name, credentials.email, credentials.password)
     print('FACEBOOK SEARCHING FINISHED')
+    print(datetime.now().strftime("%H:%M:%S"))
     print('SEARCHING INSTAGRAM')
     instagram_result = search.instagram_search(name)
     print('SEARCHING INSTAGRAM FINISHED')
+    print(datetime.now().strftime("%H:%M:%S"))
     print('SEARCHING TWITTER')
     twitter_result = search.twitter_search(name)
     for twiter in twitter_result:
         search.get_tweets_reports(twiter)
     print('TWITTER SEARCHING FINISHED')
+    print(datetime.now().strftime("%H:%M:%S"))
     print('PROCESS FINISHED, RESULTS:')
     print(facebook_result)
     print(instagram_result)
@@ -28,7 +33,8 @@ if __name__ == '__main__':
     twitter_profiles_used = []
 
     new_profiles = []
-
+    print('PROFILES CONNECTING START')
+    print(datetime.now().strftime("%H:%M:%S"))
     for fb_res in facebook_result:
         for insta_res in instagram_result:
             if matching_functions.profile_used(fb_profiles_used, fb_res) is False and matching_functions.profile_used(insta_profiles_used, insta_res) is False and matching_functions.match_profiles_by_photos(fb_res, insta_res):
@@ -42,7 +48,6 @@ if __name__ == '__main__':
                 twitter_profiles_used.append(twit_res)
                 new_profiles.append(matching_functions.fuse_profiles(fb_res, twit_res))
                 print('POŁĄCZONO FB Z TWITTEREM')
-
     for insta_res in instagram_result:
         for fb_res in facebook_result:
             if matching_functions.profile_used(insta_profiles_used, insta_res) is False and matching_functions.profile_used(fb_profiles_used, fb_res) is False and matching_functions.match_profiles_by_photos(insta_res, fb_res):
@@ -70,7 +75,8 @@ if __name__ == '__main__':
                 insta_profiles_used.append(insta_res)
                 new_profiles.append(matching_functions.fuse_profiles(twit_res, insta_res))
                 print('POŁĄCZONO TWITTERA Z INSTA')
-
+    print('SECOND LOOP STARTED')
+    print(datetime.now().strftime("%H:%M:%S"))
     new_profile_used = []
     complete_profiles = []
     for new_profile in new_profiles:
@@ -109,8 +115,8 @@ if __name__ == '__main__':
         if matching_functions.profile_used(twitter_profiles_used, t_res) is False:
             twitter_profiles_used.append(t_res)
             complete_profiles.append(t_res)
-
     print('FINISH, complete results:')
+    print(datetime.now().strftime("%H:%M:%S"))
     print(complete_profiles)
 
 
