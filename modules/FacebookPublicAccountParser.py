@@ -403,9 +403,10 @@ class FacebookPublicAccountParser:
         user_iter = 0
         for link in parse_data:
             person = {}
-            person['name'] = name_val
-            person['surname'] = surname_val
+
             person['facebook'] = {}
+            person['facebook']['name'] = name_val
+            person['facebook']['surname'] = surname_val
             person['facebook']['friends'] = self.getFriendsList(link['friends'])
             if user_iter < len(usernames):
                 person['facebook']['username'] = usernames[user_iter]

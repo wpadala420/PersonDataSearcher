@@ -3,7 +3,12 @@ from modules import FacebookPublicAccountParser, instagram, twitter2, tweetadvan
 
 def facebook_search(name, email, password):
     fb = FacebookPublicAccountParser.FacebookPublicAccountParser(email, password)
-    return fb.loggingSearchNew(name)
+    people = []
+    for profile in fb.loggingSearchNew(name):
+        person = Person()
+        person.facebook = profile['facebook']
+        people.append(person)
+    return people
 
 
 def instagram_search(name):
