@@ -1,26 +1,40 @@
 from functions import search, file_functions, matching_functions
+from modules import Person
 import credentials
 import time
 from datetime import datetime
+import pickle
+
 
 if __name__ == '__main__':
-    file_functions.clear_temportary_files('tmp/facebook')
-    file_functions.clear_temportary_files('tmp/instagram')
-    file_functions.clear_temportary_files('tmp/twitter')
+    # file_functions.clear_temportary_files('tmp/facebook')
+    # file_functions.clear_temportary_files('tmp/instagram')
+    # file_functions.clear_temportary_files('tmp/twitter')
+
+
     name = input('Type name and surname\n')
     print('START:' + datetime.now().strftime("%H:%M:%S"))
     print('FACEBOOK SEARCHING...')
     facebook_result = search.facebook_search(name, credentials.email, credentials.password)
+    # with open('facebook.dump', 'wb') as facebook_dump:
+    #     pickle.dump(facebook_result, facebook_dump)
+
     print('FACEBOOK SEARCHING FINISHED')
     print(datetime.now().strftime("%H:%M:%S"))
     print('SEARCHING INSTAGRAM')
     instagram_result = search.instagram_search(name)
+    # with open('instagram.dump', 'wb') as instagram_dump:
+    #     pickle.dump(instagram_result, instagram_dump)
+
     print('SEARCHING INSTAGRAM FINISHED')
     print(datetime.now().strftime("%H:%M:%S"))
     print('SEARCHING TWITTER')
     twitter_result = search.twitter_search(name)
     for twiter in twitter_result:
         search.get_tweets_reports(twiter)
+    # with open('twitter.dump', 'wb') as twitter_dump:
+    #     pickle.dump(twitter_result, twitter_dump)
+
     print('TWITTER SEARCHING FINISHED')
     print(datetime.now().strftime("%H:%M:%S"))
     print('PROCESS FINISHED, RESULTS:')
