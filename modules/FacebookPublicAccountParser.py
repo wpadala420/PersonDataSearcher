@@ -307,7 +307,7 @@ class FacebookPublicAccountParser:
             print('Nieprawidłowe dane do logowania lub niepowodzenie logowania, próba logowania przez webdriver\n')
             webdriver_logging = True
             b = None
-        time.sleep(3)
+        time.sleep(5)
         links = self.nonLoggingSearch(name)
         new_links = []
         for link in links:
@@ -335,11 +335,7 @@ class FacebookPublicAccountParser:
 
 
             for link in links:
-                # print(a + ':' + b + ':' + c)
-                # new_sess = session.get(link)
-                # var = new_sess.content
-                # var_t = new_sess.text
-                # str_var = str(var, encoding='utf-8')
+                time.sleep(10)
                 str_var = self.getProfileContent(browser, link)
                 general_contents.append(str_var)
                 with open('main_page.txt', 'wb') as tmp_file:
@@ -350,16 +346,20 @@ class FacebookPublicAccountParser:
                 #     print('tak')
                 profile_photo_url = self.getProfilePhotoUrl('main_page.txt')
                 profile_photos_urls.append(profile_photo_url)
+                time.sleep(5)
                 profile_photo_content = self.getProfilePhotoContent(browser, profile_photo_url)
                 direct_url = self.getProfilePhotoDirectUrl(profile_photo_content)
                 profile_photos_direct_urls.append(direct_url)
                 friends_url = self.getFriendsUrl('main_page.txt')
+                time.sleep(5)
                 friends_content = self.getFriendsContent(browser, friends_url)
                 friends_contents.append(friends_content)
                 about_url = self.getAboutUrl('main_page.txt')
                 if(about_url is not None):
+                    time.sleep(5)
                     about_content = self.getAboutContent(browser, about_url)
                     about_contents.append(about_content)
+                time.sleep(15)
 
             for i in range(0, len(general_contents)):
                 general = None
@@ -504,15 +504,15 @@ class FacebookPublicAccountParser:
                 for member in members:
                     names = member.find_all('span')
                     roles = member.find_all('h3')
-                    name_val = ''
+                    family_name_val = ''
                     role_val = ''
                     for name in names:
                         if name.text != '':
-                            name_val = name.text
+                            family_name_val = name.text
                     for role in roles:
-                        if role.text != '' and role.text != name_val:
+                        if role.text != '' and role.text != family_name_val:
                             role_val = role.text
-                    family_member = {'name': name_val, 'role': role_val}
+                    family_member = {'name': family_name_val, 'role': role_val}
                     family.append(family_member)
             # -----------------------------------------------------------------------------
             # friends url

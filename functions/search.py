@@ -5,7 +5,7 @@ def facebook_search(name, email, password):
     fb = FacebookPublicAccountParser.FacebookPublicAccountParser(email, password)
     people = []
     for profile in fb.loggingSearchNew(name):
-        person = Person()
+        person = Person.Person()
         person.facebook = profile['facebook']
         people.append(person)
     return people

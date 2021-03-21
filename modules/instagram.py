@@ -54,10 +54,17 @@ class InstagramSearcher:
                 soup = bs4.BeautifulSoup(browser.page_source)
                 json_elem = soup.find('pre').text
                 dict_json = json.loads(json_elem)
+                browser.close()
                 return dict_json
         except:
             print(Exception.args)
-            return {}
+            try:
+                soup = bs4.BeautifulSoup(browser.page_source)
+                json_elem = soup.find('pre').text
+                dict_json = json.loads(json_elem)
+                return dict_json
+            except:
+                return {}
 
     def search(self, name):
         session = requests.session()
