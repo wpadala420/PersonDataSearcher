@@ -1,4 +1,4 @@
-from functions import search, file_functions, matching_functions
+from functions import search, file_functions, matching_functions, raports
 from modules import Person, pdf_search
 import credentials
 import time
@@ -157,6 +157,8 @@ if __name__ == '__main__':
     for i in range(len(pdf_urls)):
         pdf_search.download_pdf(dir, str(i) + '.pdf', pdf_urls[i])
 
+    for i in range(len(complete_profiles)):
+        raports.generate_raport('raports', str(i) + '.txt', complete_profiles[i])
 
 
 
