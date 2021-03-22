@@ -1,5 +1,5 @@
 from functions import search, file_functions, matching_functions
-from modules import Person
+from modules import Person, pdf_search
 import credentials
 import time
 from datetime import datetime
@@ -152,6 +152,10 @@ if __name__ == '__main__':
                     registries_used.append(registry)
                     matching_functions.add_registry_data(profile, registry)
 
+    pdf_urls = pdf_search.search_pdfs(name)
+    dir = 'tmp/pdfs'
+    for i in range(len(pdf_urls)):
+        pdf_search.download_pdf(dir, str(i) + '.pdf', pdf_urls[i])
 
 
 
