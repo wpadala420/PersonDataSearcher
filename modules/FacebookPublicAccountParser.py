@@ -319,93 +319,93 @@ class FacebookPublicAccountParser:
         count = 0
         usernames = []
         browser = self.loginSelenium()
-        # if b is None:
-        #     b = ''
-        # if b:
-        #     general_contents = []
-        #     about_contents = []
-        #     friends_contents = []
-        #     profile_photos_urls = []
-        #     profile_photos_direct_urls = []
-        #     if a is None:
-        #         a = ''
-        #     if b is None:
-        #         b = ''
-        #     if c is None:
-        #         c = ''
-        #
-        #
-        #     for link in links:
-        #         time.sleep(10)
-        #         str_var = self.getProfileContent(browser, link)
-        #         general_contents.append(str_var)
-        #         with open('main_page.txt', 'wb') as tmp_file:
-        #             tmp_file.write(bytes(str_var, encoding='utf-8'))
-        #         username = self.getUserNameFromLink(link)
-        #         usernames.append(username)
-        #         # if link.find('emil.wrobel.90') != -1:
-        #         #     print('tak')
-        #         profile_photo_url = self.getProfilePhotoUrl('main_page.txt')
-        #         profile_photos_urls.append(profile_photo_url)
-        #         time.sleep(5)
-        #         profile_photo_content = self.getProfilePhotoContent(browser, profile_photo_url)
-        #         direct_url = self.getProfilePhotoDirectUrl(profile_photo_content)
-        #         profile_photos_direct_urls.append(direct_url)
-        #         friends_url = self.getFriendsUrl('main_page.txt')
-        #         time.sleep(5)
-        #         friends_content = self.getFriendsContent(browser, friends_url)
-        #         friends_contents.append(friends_content)
-        #         about_url = self.getAboutUrl('main_page.txt')
-        #         if(about_url is not None):
-        #             time.sleep(5)
-        #             about_content = self.getAboutContent(browser, about_url)
-        #             about_contents.append(about_content)
-        #         time.sleep(15)
-        #
-        #     for i in range(0, len(general_contents)):
-        #         general = None
-        #         about = None
-        #         friends = None
-        #         if i < len(general_contents):
-        #             general = general_contents[i]
-        #         else:
-        #             general = None
-        #         if i < len(about_contents):
-        #             about = about_contents[i]
-        #         else:
-        #             about = None
-        #         if i < len(friends_contents):
-        #             friends = friends_contents[i]
-        #         else:
-        #             friends = None
-        #         profile_photo_url = ''
-        #         profile_photo_direct_url = ''
-        #         if profile_photo_url is None:
-        #             profile_photo_url = ''
-        #         else:
-        #             if i < len(profile_photos_urls):
-        #                 profile_photo_url = profile_photos_urls[i]
-        #         if i < len(profile_photos_direct_urls):
-        #             profile_photo_direct_url = profile_photos_direct_urls[i]
-        #         data = {'general': general, 'about': about, 'friends': friends, 'profile_photo_url': profile_photo_url, 'profile_photo_direct_url': profile_photo_direct_url}
-        #         parse_data.append(data)
-        # else:
-        #     general_contents, about_contents, friends_contents, profile_photo_urls = self.getAllContentsByWebdriver(browser, links)
-        #     for link in links:
-        #         usernames.append(self.getUserNameFromLink(link))
-        #     for i in range(0, len(general_contents)):
-        #         profile_photo_direct_url = ''
-        #         if profile_photo_urls[i] is not None and profile_photo_urls[i] != '':
-        #             profile_photo_content = self.getProfilePhotoContent(browser, profile_photo_urls[i])
-        #             direct_url = self.getProfilePhotoDirectUrl(profile_photo_content)
-        #             profile_photo_direct_url = direct_url
-        #         data = {'general': general_contents[i], 'about': about_contents[i], 'friends': friends_contents[i], 'profile_photo_url': profile_photo_urls[i], 'profile_photo_direct_url': direct_url}
-        #         parse_data.append(data)
-        # with open('parse_data.dump', 'wb') as parse_data_dump:
-        #     pickle.dump(parse_data, parse_data_dump)
+        if b is None:
+            b = ''
+        if b:
+            general_contents = []
+            about_contents = []
+            friends_contents = []
+            profile_photos_urls = []
+            profile_photos_direct_urls = []
+            if a is None:
+                a = ''
+            if b is None:
+                b = ''
+            if c is None:
+                c = ''
 
-        with open('parse_data.dump', 'rb') as dump:
-            parse_data = pickle.load(dump)
+
+            for link in links:
+                time.sleep(10)
+                str_var = self.getProfileContent(browser, link)
+                general_contents.append(str_var)
+                with open('main_page.txt', 'wb') as tmp_file:
+                    tmp_file.write(bytes(str_var, encoding='utf-8'))
+                username = self.getUserNameFromLink(link)
+                usernames.append(username)
+                # if link.find('emil.wrobel.90') != -1:
+                #     print('tak')
+                profile_photo_url = self.getProfilePhotoUrl('main_page.txt')
+                profile_photos_urls.append(profile_photo_url)
+                time.sleep(5)
+                profile_photo_content = self.getProfilePhotoContent(browser, profile_photo_url)
+                direct_url = self.getProfilePhotoDirectUrl(profile_photo_content)
+                profile_photos_direct_urls.append(direct_url)
+                friends_url = self.getFriendsUrl('main_page.txt')
+                time.sleep(5)
+                friends_content = self.getFriendsContent(browser, friends_url)
+                friends_contents.append(friends_content)
+                about_url = self.getAboutUrl('main_page.txt')
+                if(about_url is not None):
+                    time.sleep(5)
+                    about_content = self.getAboutContent(browser, about_url)
+                    about_contents.append(about_content)
+                time.sleep(15)
+
+            for i in range(0, len(general_contents)):
+                general = None
+                about = None
+                friends = None
+                if i < len(general_contents):
+                    general = general_contents[i]
+                else:
+                    general = None
+                if i < len(about_contents):
+                    about = about_contents[i]
+                else:
+                    about = None
+                if i < len(friends_contents):
+                    friends = friends_contents[i]
+                else:
+                    friends = None
+                profile_photo_url = ''
+                profile_photo_direct_url = ''
+                if profile_photo_url is None:
+                    profile_photo_url = ''
+                else:
+                    if i < len(profile_photos_urls):
+                        profile_photo_url = profile_photos_urls[i]
+                if i < len(profile_photos_direct_urls):
+                    profile_photo_direct_url = profile_photos_direct_urls[i]
+                data = {'general': general, 'about': about, 'friends': friends, 'profile_photo_url': profile_photo_url, 'profile_photo_direct_url': profile_photo_direct_url}
+                parse_data.append(data)
+        else:
+            general_contents, about_contents, friends_contents, profile_photo_urls = self.getAllContentsByWebdriver(browser, links)
+            for link in links:
+                usernames.append(self.getUserNameFromLink(link))
+            for i in range(0, len(general_contents)):
+                profile_photo_direct_url = ''
+                if profile_photo_urls[i] is not None and profile_photo_urls[i] != '':
+                    profile_photo_content = self.getProfilePhotoContent(browser, profile_photo_urls[i])
+                    direct_url = self.getProfilePhotoDirectUrl(profile_photo_content)
+                    profile_photo_direct_url = direct_url
+                data = {'general': general_contents[i], 'about': about_contents[i], 'friends': friends_contents[i], 'profile_photo_url': profile_photo_urls[i], 'profile_photo_direct_url': direct_url}
+                parse_data.append(data)
+        with open('parse_data2.dump', 'wb') as parse_data_dump:
+            pickle.dump(parse_data, parse_data_dump)
+
+        # with open('parse_data2.dump', 'rb') as dump:
+        #     parse_data = pickle.load(dump)
         user_iter = 0
         for link in parse_data:
             person = {}
@@ -623,7 +623,7 @@ class FacebookPublicAccountParser:
         for col in cols:
             a_tags = col.find_all('a')
             for a in a_tags:
-                if 'href' in a and a['href'].find('photo') != -1:
+                if a['href'] is not None and a['href'].find('photo') != -1:
                     href = base_url + a['href']
                     hrefs.append(href)
         return hrefs

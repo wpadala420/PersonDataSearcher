@@ -46,18 +46,19 @@ class TwitterSearch:
                     tweet['wspomniane_osoby']=[c['screen_name'] for c in i['user_mentions']]
                 osoba.twitter['tweets'].append(tweet)
             if 'profile_image_url_https' in i:
-                osoba.twitter['profile_image_url']=i['profile_image_url_https']
-            self.found.append(osoba)
-        for person in self.found:
-            if 'profile_image_url' in person.twitter:
-                print(person.twitter['profile_image_url'])
+                osoba.twitter['profile_image_url'] = i['profile_image_url_https']
+            if 'profile_image_url' in osoba.twitter:
+                print(osoba.twitter['profile_image_url'])
                 try:
-                    url = 'tmp/twitter/' + person.twitter['nickname']
-                    path = functions.image_functions.download_photo(url, person.twitter['profile_image_url'], 'profile.jpg')
+                    url = 'tmp/twitter/' + osoba.twitter['nickname']
+                    path = functions.image_functions.download_photo(url, osoba.twitter['profile_image_url'], 'profile.jpg')
                     osoba.twitter['profile_img_path'] = path
-                    # print(functions.image_functions.get_location_info(person.twitter['nickname'] + '.jpg'))
+
                 except:
                     pass
+            self.found.append(osoba)
+
+
 
 
 

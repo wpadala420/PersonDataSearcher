@@ -41,24 +41,27 @@ class RegistrySearcher:
             if a['class'] == 'Person':
                 person = Person()
                 person.setName(a['data']['first_name'])
-                person.setDateOfBirth(a['data']['birthdate'])
+                if 'birthdate' in a['data']:
+                    person.setDateOfBirth(a['data']['birthdate'])
+                else:
+                    person.setDateOfBirth(str(a['data']['birthday_day']) + '-' + str(a['data']['birthday_month']))
                 person.setSurname(a['data']['last_name'])
                 krs = {}
                 krs['krsId'] = a['data']['krs_id']
                 person.addName(a['data']['first_name'])
                 if a['data']['second_names']:
                     person.addName(a['data']['second_names'])
-                if a['data']['registries'].count('krs') > 0 :
-                    if 'krs' in a['items']['registries'] and 'organizations_shortlist' in  a['items']['registries']['krs']['data']:
-                        organizations = a['items']['registries']['krs']['data']['organizations_shortlist']
+                if 'organizations_count' in a['data'] and a['data']['organizations_count'] > 0 :
+                    if 'krs' in a['items']['registries'] and 'organizations_shortlist' in  a['data']:
+                        organizations = a['data']['organizations_shortlist']
                         orgList = []
                         for o in organizations:
                             orgList.append(o['name_short'])
                         krs['organizations'] = orgList
+
+
                         person.addRegistryData(krs)
-                        person.setUrl(
-                            'https://rejestr.io/osoby/{}/{}'.format(a['items']['registries']['krs']['data']['person_id'],
-                                                            a['slug']))
+                        person.setUrl('https://rejestr.io/osoby/{}/{}'.format(a['data']['id'], a['slug']))
                     elif a['data']['registries'].count('ipn') > 0:
                         if 'ipn' in a['items']['registries'] and 'data' in a['items']['registries']['ipn']:
                             ipn={}
@@ -68,6 +71,18 @@ class RegistrySearcher:
                             person.addRegistryData(ipn)
                             url='https://rejestr.io/osoby/{}/{}'.format(a['data']['id'],a['slug'])
                             person.setUrl(url)
+                for org in person.registries:
+                    data = []
+                    for name in org['organizations']:
+                        found = None
+                        if len(dictionary['organizations']['items']) > 0:
+                            for it in dictionary['organizations']['items']:
+                                if len(it['data']) > 0:
+                                    if name == it['data']['name_short']:
+                                        found = it['data']
+                            data.append(found)
+                    org['organizations_data'] = data
+
                 ludzie.append(person)
 
 
@@ -101,11 +116,9 @@ class RegistrySearcher:
                 elemsIpn=body.find_all('div',{'class' : 'chapter ipn mt-2'})
 
     def searchData(self,name):
-        self.peopleFound=self.startSearch(name)
+        self.peopleFound = self.startSearch(name)
+        return self.peopleFound
 
-
-reg = RegistrySearcher()
-print(reg.searchData('Damian Rusinek'))
 
 
 

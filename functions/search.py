@@ -1,4 +1,4 @@
-from modules import FacebookPublicAccountParser, instagram, twitter2, tweetadvanced, Person
+from modules import FacebookPublicAccountParser, instagram, twitter2, tweetadvanced, Person, rejestr
 
 
 def facebook_search(name, email, password):
@@ -26,3 +26,12 @@ def twitter_search(name):
 def get_tweets_reports(person):
     tweetadvanced.get_report(person.twitter['nickname'])
     person.twitter['report'] = person.twitter['nickname'] + '.txt'
+
+
+def registries_search(name):
+    rs = rejestr.RegistrySearcher()
+    rs.searchData(name)
+    return rs.peopleFound
+
+
+

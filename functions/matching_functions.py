@@ -109,3 +109,27 @@ def profile_used(profiles_used, profile):
     return False
 
 
+def match_companies_from_registries(profile, registry):
+    if len(profile.facebook) > 0:
+        if len(profile.facebook['friends']) > 0 and len(registry.registries) > 0:
+            for organization in registry.registries:
+                if len(organization['organizations_data']) > 0:
+                    for data in organization['organizations_data']:
+                        for friend in profile.facebook['friends']:
+                            if data is not None and 'ceo' in data and data['ceo']['name'] == friend:
+                                return True
+
+
+def add_registry_data(profile, data):
+    if profile.dateOfBirth == '':
+        profile.dateOfBirth = data.dateOfBirth
+    if len(profile.names) == 0:
+        profile.names = data.names
+    if data.registries not in profile.registries:
+        profile.registries = data.registries
+    if profile.rejestrUrl is None or profile.rejestrUrl == '':
+        profile.rejestrUrl = data.rejestrUrl
+
+
+
+
