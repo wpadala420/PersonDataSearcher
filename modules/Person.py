@@ -1,22 +1,23 @@
 class Person(object):
 
     def __init__(self):
-        self.name=''
-        self.names=[]
-        self.surname=''
-        self.title=''
-        self.branches=[]
-        self.dateOfBirth=''
-        self.registries=[]
-        self.rejestrUrl=''
-        self.twitter={}
-        self.instagram={}
-        self.photosNumber=0
-        self.photos=[]
-        self.linkedin={}
-        self.facebook={}
-        self.imdb={}
-        self.wiki={}
+        self.name = ''
+        self.names = []
+        self.surname = ''
+        self.title = ''
+        self.branches = []
+        self.dateOfBirth = ''
+        self.registries = []
+        self.rejestrUrl = ''
+        self.twitter = {}
+        self.instagram = {}
+        self.photosNumber = 0
+        self.photos = []
+        self.linkedin = {}
+        self.facebook = {}
+        self.imdb = {}
+        self.wiki = {}
+        self.vindicat_data = {}
 
     def setName(self, name):
         self.name=name
