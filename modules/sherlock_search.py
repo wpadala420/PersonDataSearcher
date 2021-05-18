@@ -10,8 +10,8 @@ def search_sherlock(nickname):
         for line in file_read:
             if line.find('[+]') != -1:
                 elem = {}
-                site_name = line.split(': ')[0].strip()
-                site_url = line.split(': ')[1].strip()
+                site_name = line.split(': ')[0].replace('\x1b[0m[+]', '').strip()
+                site_url = line.split(': ')[1].replace('\x1b[0m', '').strip()
                 elem['site_name'] = site_name
                 elem['site_url'] = site_url
                 results.append(elem)
