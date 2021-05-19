@@ -1,9 +1,12 @@
 import os
+import functions.visualization_functions
 
 def generate_raport(directory, filename, profile):
     if os.path.isdir(directory) is False:
         os.mkdir(directory)
     path = directory + '/' + filename
+    graph = functions.visualization_functions.GraphVisualization()
+
     with open(path, 'wb') as raport:
         name = ''
         surname = ''
@@ -23,11 +26,14 @@ def generate_raport(directory, filename, profile):
         facebook_header = 'Dane z Facebooka:' + '\n'
         raport.write(bytes(facebook_header, encoding='utf-8'))
         if len(profile.facebook) > 0:
+            fb_edge = 'FACEBOOK\n' + profile.facebook['username']
+            graph.addEdge(name + ' ' + surname, fb_edge)
             fb_username = 'Nazwa użytkownika: ' + profile.facebook['username'] + '\n'
             raport.write(bytes(fb_username, encoding='utf-8'))
             fb_friends = 'Znajomi:' + '\n'
             raport.write(bytes(fb_friends, encoding='utf-8'))
             for friend in profile.facebook['friends']:
+                graph.addEdge(fb_edge, friend)
                 raport.write(bytes('\t' + friend + '\n', encoding='utf-8'))
 
             if 'profile_photo_path' in profile.facebook and profile.facebook['profile_photo_path'] != '':
@@ -63,6 +69,8 @@ def generate_raport(directory, filename, profile):
 
 
         if len(profile.twitter) > 0:
+            twit_edge = 'TWITTER\n' + profile.twitter['nickname']
+            graph.addEdge(name + ' ' + surname, twit_edge)
             twitter_header = 'Dane z Twittera:' + '\n'
             raport.write(bytes(twitter_header, encoding='utf-8'))
             t_username = 'Nazwa użytkownika: ' + profile.twitter['nickname'] + '\n'
@@ -76,6 +84,7 @@ def generate_raport(directory, filename, profile):
                 raport.write(bytes(sites, encoding='utf-8'))
                 for site in profile.twitter['sites']:
                     s_line = '\t' + site + '\n'
+                    graph.addEdge(twit_edge, site)
                     raport.write(bytes(s_line, encoding='utf-8'))
             if profile.twitter['profile_img_path'] != '':
                 tt_pp = 'Lokalizacja zdjęcia profilowego:' + '\n'
@@ -85,12 +94,14 @@ def generate_raport(directory, filename, profile):
             if profile.twitter['report'] != '':
                 tr = 'Analiza Tweetów' + '\n'
                 raport.write(bytes(tr, encoding='utf-8'))
-                with open(' ' + profile.twitter['report'], 'rb') as t_report:
+                with open('tmp/twitter/ ' + profile.twitter['report'], 'rb') as t_report:
                     for lt in t_report:
                         new_line = '\t' + str(lt, encoding='utf-8')
                         raport.write(bytes(new_line, encoding='utf-8'))
 
         if len(profile.instagram) > 0:
+            ig_edge = 'INSTAGRAM\n' + profile.instagram['login']
+            graph.addEdge(name + ' ' + surname, ig_edge)
             ig_header = 'Dane z Instagrama:' + '\n'
             raport.write(bytes(ig_header, encoding='utf-8'))
             ig_login = 'Nazwa uzytkownika: ' + profile.instagram['login'] + '\n'
@@ -114,6 +125,7 @@ def generate_raport(directory, filename, profile):
             for reg in profile.registries:
                 if len(reg['organizations_data']) > 0:
                     for o_data in reg['organizations_data']:
+                        graph.addEdge(name + ' ' + surname, o_data['name'])
                         comp_name = 'Nazwa firmy:' + o_data['name'] + '\n'
                         raport.write(bytes('\t' + comp_name, encoding='utf-8'))
                         regon = 'REGON: ' + o_data['regon'] + '\n'
@@ -127,11 +139,14 @@ def generate_raport(directory, filename, profile):
                             adr_line = 'Adres: ' + adr + '\n'
                             raport.write(bytes('\t' + adr_line, encoding='utf-8'))
                         if len(o_data['ceo']) > 0:
+                            graph.addEdge(o_data['name'], o_data['ceo']['full_name'])
                             ceo_line = "CEO:" + '\n'
                             raport.write(bytes('\t' + ceo_line, encoding='utf-8'))
                             raport.write(bytes('\t\t' + o_data['ceo']['full_name'] + '\n', encoding='utf-8'))
                             raport.write(bytes('\t\t' + o_data['ceo']['birthday'] + '\n', encoding='utf-8'))
                             raport.write(bytes('\t\t' + o_data['ceo']['title'] + '\n', encoding='utf-8'))
+
+        graph.visualize(directory + '/' + filename.replace('.txt', '.png'))
 
 
 
