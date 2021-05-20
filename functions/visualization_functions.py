@@ -15,7 +15,7 @@ class GraphVisualization:
     def visualize(self, filename):
         G = nx.Graph()
         G.add_edges_from(self.visual)
-        plt.figure(figsize=(30, 30))
+        plt.figure(figsize=(40, 40))
         nx.draw_networkx(G)
         plt.tight_layout()
         plt.savefig(filename, dpi=150)

@@ -2,9 +2,9 @@ import subprocess
 
 def search_sherlock(nickname):
     results = []
-    filename = '../tmp/sherlock/ ' + nickname + '.txt'
+    filename = 'tmp/sherlock/' + nickname + '.txt'
     with open(filename, 'w+') as file_write:
-        subprocess.call(['python3', 'sherlock/sherlock.py', nickname, '--no-color'], stdout=file_write)
+        subprocess.call(['python3', 'modules/sherlock/sherlock.py', nickname, '--no-color'], stdout=file_write)
 
     with open(filename, 'r+') as file_read:
         for line in file_read:
@@ -17,5 +17,3 @@ def search_sherlock(nickname):
                 results.append(elem)
 
     return results
-
-print(search_sherlock('drdr_zz'))

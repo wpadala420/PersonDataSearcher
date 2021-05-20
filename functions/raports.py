@@ -1,5 +1,6 @@
 import os
 import functions.visualization_functions
+import modules.sherlock_search
 
 def generate_raport(directory, filename, profile):
     if os.path.isdir(directory) is False:
@@ -26,14 +27,21 @@ def generate_raport(directory, filename, profile):
         facebook_header = 'Dane z Facebooka:' + '\n'
         raport.write(bytes(facebook_header, encoding='utf-8'))
         if len(profile.facebook) > 0:
-            fb_edge = 'FACEBOOK\n' + profile.facebook['username']
-            graph.addEdge(name + ' ' + surname, fb_edge)
+            fb_edge_title = 'FACEBOOK'
+            graph.addEdge(name + ' ' + surname, fb_edge_title)
+            fb_username_edge = 'USERNAME\n' + profile.facebook['username']
+            graph.addEdge(fb_edge_title, fb_username_edge)
+            related_accounts = modules.sherlock_search.search_sherlock(profile.facebook['username'])
+            for related_account in related_accounts:
+                graph.addEdge(fb_username_edge, related_account['site_name'] + '\n' + related_account['site_url'])
+            fb_friends_node = 'FRIENDS:\n'
+            graph.addEdge(fb_edge_title, fb_friends_node)
             fb_username = 'Nazwa użytkownika: ' + profile.facebook['username'] + '\n'
             raport.write(bytes(fb_username, encoding='utf-8'))
             fb_friends = 'Znajomi:' + '\n'
             raport.write(bytes(fb_friends, encoding='utf-8'))
             for friend in profile.facebook['friends']:
-                graph.addEdge(fb_edge, friend)
+                graph.addEdge(fb_friends_node, friend)
                 raport.write(bytes('\t' + friend + '\n', encoding='utf-8'))
 
             if 'profile_photo_path' in profile.facebook and profile.facebook['profile_photo_path'] != '':
@@ -69,8 +77,13 @@ def generate_raport(directory, filename, profile):
 
 
         if len(profile.twitter) > 0:
-            twit_edge = 'TWITTER\n' + profile.twitter['nickname']
+            twit_edge = 'TWITTER\n'
+            twit_username_node = 'USERNAME:\n' + profile.twitter['nickname']
+            twitter_username_connected_profiles = modules.sherlock_search.search_sherlock(profile.twitter['nickname'])
             graph.addEdge(name + ' ' + surname, twit_edge)
+            graph.addEdge(twit_edge, twit_username_node)
+            for prof in twitter_username_connected_profiles:
+                graph.addEdge(twit_username_node, prof['site_name'] + '\n' + prof['site_url'])
             twitter_header = 'Dane z Twittera:' + '\n'
             raport.write(bytes(twitter_header, encoding='utf-8'))
             t_username = 'Nazwa użytkownika: ' + profile.twitter['nickname'] + '\n'
@@ -101,6 +114,9 @@ def generate_raport(directory, filename, profile):
 
         if len(profile.instagram) > 0:
             ig_edge = 'INSTAGRAM\n' + profile.instagram['login']
+            related_instagram_profiles = modules.sherlock_search.search_sherlock(profile.instagram['login'])
+            for related_instagram in related_instagram_profiles:
+                graph.addEdge(ig_edge, related_instagram['site_name'] + '\n' + related_instagram['site_url'])
             graph.addEdge(name + ' ' + surname, ig_edge)
             ig_header = 'Dane z Instagrama:' + '\n'
             raport.write(bytes(ig_header, encoding='utf-8'))
@@ -139,7 +155,28 @@ def generate_raport(directory, filename, profile):
                             adr_line = 'Adres: ' + adr + '\n'
                             raport.write(bytes('\t' + adr_line, encoding='utf-8'))
                         if len(o_data['ceo']) > 0:
-                            graph.addEdge(o_data['name'], o_data['ceo']['full_name'])
+                            if len(profile.facebook) > 0:
+                                if len(profile.facebook['friends']) > 0:
+                                    facebook_friend_connected = False
+                                    found_friend_value = ''
+                                    for friend in profile.facebook['friends']:
+                                        friend_found = True
+                                        friend_split = friend.split(' ')
+                                        for fs in friend_split:
+                                            if o_data['ceo']['full_name'].find(fs) == -1:
+                                                friend_found = False
+                                        if friend_found:
+                                            found_friend_value = friend
+                                            facebook_friend_connected = True
+                                    if facebook_friend_connected:
+                                        graph.addEdge(o_data['name'], found_friend_value)
+                                    else:
+                                        graph.addEdge(o_data['name'], o_data['ceo']['full_name'])
+                                else:
+                                    graph.addEdge(o_data['name'], o_data['ceo']['full_name'])
+                            else:
+                                graph.addEdge(o_data['name'], o_data['ceo']['full_name'])
+
                             ceo_line = "CEO:" + '\n'
                             raport.write(bytes('\t' + ceo_line, encoding='utf-8'))
                             raport.write(bytes('\t\t' + o_data['ceo']['full_name'] + '\n', encoding='utf-8'))
