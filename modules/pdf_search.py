@@ -2,6 +2,7 @@ import googlesearch
 import os
 import requests
 
+
 def search_pdfs(name):
     query = name + ' filetype:pdf'
     results = googlesearch.search(query)

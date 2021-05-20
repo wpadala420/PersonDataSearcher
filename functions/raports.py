@@ -3,6 +3,7 @@ import functions.visualization_functions
 import functions.search
 import modules.sherlock_search
 
+
 def generate_raport(directory, filename, profile):
     if os.path.isdir(directory) is False:
         os.mkdir(directory)
@@ -116,6 +117,7 @@ def generate_raport(directory, filename, profile):
                     hashtags_node = 'HASHTAGS'
                     graph.addEdge(twit_edge, hashtags_node)
                     for ht in profile.twitter['hashtags']:
+                        profile.keywords.append(ht)
                         graph.addEdge(hashtags_node, ht)
 
         if len(profile.instagram) > 0:
@@ -139,7 +141,6 @@ def generate_raport(directory, filename, profile):
                 for post in profile.instagram['posts']:
                     if post['path'] != '':
                         raport.write(bytes('\t' + post['path'] + '\n', encoding='utf-8'))
-
 
         if len(profile.registries) > 0:
             reg_header = 'Dane z KRS:' + '\n'

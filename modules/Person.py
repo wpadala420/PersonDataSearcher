@@ -18,6 +18,7 @@ class Person(object):
         self.imdb = {}
         self.wiki = {}
         self.vindicat_data = {}
+        self.keywords = []
 
     def setName(self, name):
         self.name=name

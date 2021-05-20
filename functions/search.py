@@ -65,7 +65,6 @@ def get_tweets_reports(person):
     person.twitter['hashtags'] = []
 
 
-
 def registries_search(name):
     rs = rejestr.RegistrySearcher()
     rs.searchData(name)
