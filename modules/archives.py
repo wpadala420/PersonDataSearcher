@@ -19,6 +19,6 @@ class ArchiveSearcher:
 
 
 s=ArchiveSearcher()
-s.search('Andrzej Duda')
+s.search('Damian Rusinek')
 for i in s.links:
     print(i)

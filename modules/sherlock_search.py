@@ -1,5 +1,6 @@
 import subprocess
 
+
 def search_sherlock(nickname):
     results = []
     filename = 'tmp/sherlock/' + nickname + '.txt'

@@ -1,5 +1,6 @@
 import os
 import functions.visualization_functions
+import functions.search
 import modules.sherlock_search
 
 def generate_raport(directory, filename, profile):
@@ -75,7 +76,6 @@ def generate_raport(directory, filename, profile):
                     r_line = '\t' + str(r) + '\n'
                     raport.write(bytes(r_line, encoding='utf-8'))
 
-
         if len(profile.twitter) > 0:
             twit_edge = 'TWITTER\n'
             twit_username_node = 'USERNAME:\n' + profile.twitter['nickname']
@@ -111,6 +111,12 @@ def generate_raport(directory, filename, profile):
                     for lt in t_report:
                         new_line = '\t' + str(lt, encoding='utf-8')
                         raport.write(bytes(new_line, encoding='utf-8'))
+                profile.twitter['hashtags'] = functions.search.get_top_hashtags_from_tt_report('tmp/twitter/ ' + profile.twitter['report'])
+                if 'hashtags' in profile.twitter and len(profile.twitter['hashtags']) > 0:
+                    hashtags_node = 'HASHTAGS'
+                    graph.addEdge(twit_edge, hashtags_node)
+                    for ht in profile.twitter['hashtags']:
+                        graph.addEdge(hashtags_node, ht)
 
         if len(profile.instagram) > 0:
             ig_edge = 'INSTAGRAM\n' + profile.instagram['login']
