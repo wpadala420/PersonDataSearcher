@@ -51,7 +51,7 @@ class InstagramSearcher:
                 data = browser.page_source
 
 
-                soup = bs4.BeautifulSoup(browser.page_source)
+                soup = bs4.BeautifulSoup(browser.page_source, features='lxml')
                 json_elem = soup.find('pre').text
                 dict_json = json.loads(json_elem)
                 browser.close()
@@ -101,7 +101,7 @@ class InstagramSearcher:
                         post = {}
                         post['date'] = str(p.date)
                         post['url'] = str(p.url)
-                        post['users tagged'] = str(p.tagged_users)
+                        post['users tagged'] = p.tagged_users
                         post['hashtags'] = str(p.caption_hashtags)
                         if p.location:
                             post['localization'] = str(p.location)
@@ -114,7 +114,8 @@ class InstagramSearcher:
                             post['path'] = ''
                         osoba.instagram['posts'].append(post)
                         osoba.photosNumber += 1
-                except:
+                except Exception:
+                    print(str(Exception))
                     pass
                 time.sleep(2)
             self.peopleFound.append(osoba)

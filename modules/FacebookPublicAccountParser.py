@@ -160,7 +160,7 @@ class FacebookPublicAccountParser:
             print('Nieprawidłowe dane do logowania lub niepowodzenie logowania, próba logowania przez webdriver\n')
             webdriver_logging = True
             b = None
-        time.sleep(3)
+        time.sleep(6)
         links = self.nonLoggingSearch(name)
         count = 0
         for link in links:
@@ -308,7 +308,7 @@ class FacebookPublicAccountParser:
             print('Nieprawidłowe dane do logowania lub niepowodzenie logowania, próba logowania przez webdriver\n')
             webdriver_logging = True
             b = None
-        time.sleep(5)
+        time.sleep(10)
         links = self.nonLoggingSearch(name)
         new_links = []
         for link in links:
@@ -336,7 +336,7 @@ class FacebookPublicAccountParser:
 
 
             for link in links:
-                time.sleep(10)
+                time.sleep(15)
                 str_var = self.getProfileContent(browser, link)
                 general_contents.append(str_var)
                 with open('main_page.txt', 'wb') as tmp_file:
@@ -357,10 +357,10 @@ class FacebookPublicAccountParser:
                 friends_contents.append(friends_content)
                 about_url = self.getAboutUrl('main_page.txt')
                 if(about_url is not None):
-                    time.sleep(5)
+                    time.sleep(10)
                     about_content = self.getAboutContent(browser, about_url)
                     about_contents.append(about_content)
-                time.sleep(15)
+                time.sleep(20)
 
             for i in range(0, len(general_contents)):
                 general = None
@@ -437,7 +437,7 @@ class FacebookPublicAccountParser:
             # ---------------------------------------------------------------------
             about = self.getAboutUrl('main_page.txt')
             # print(about)
-            time.sleep(2)
+            time.sleep(5)
             cont = None
             if 'about' in link and link['about'] is None:
                 link['about'] = ''
@@ -448,7 +448,7 @@ class FacebookPublicAccountParser:
                 person['facebook']['photos'].append(photo_url)
                 photo_content = self.getProfileContent(browser, photo_url)
                 person['facebook']['photos_direct'].append(self.getPhotoDirectUrl(photo_content))
-                time.sleep(3)
+                time.sleep(5)
             person['facebook']['photos_paths'] = []
             it = 0
             for photo in person['facebook']['photos_direct']:
@@ -605,9 +605,9 @@ class FacebookPublicAccountParser:
     def getProfilePhotoContent(self, browser, url):
         try:
             if url is not None:
-                time.sleep(7)
-                browser.get(url)
                 time.sleep(10)
+                browser.get(url)
+                time.sleep(15)
                 content = browser.execute_script("return document.documentElement.outerHTML;")
                 return content
             else:
@@ -661,9 +661,9 @@ class FacebookPublicAccountParser:
 
     def getProfileContent(self, browser, url):
         try:
-            time.sleep(7)
-            browser.get(url)
             time.sleep(10)
+            browser.get(url)
+            time.sleep(15)
             content = browser.execute_script("return document.documentElement.outerHTML;")
             return content
         except:
@@ -675,7 +675,7 @@ class FacebookPublicAccountParser:
             options.headless = True
             browser = webdriver.Firefox()
             browser.get('https://m.facebook.com/login.php')
-            time.sleep(5)
+            time.sleep(10)
             submit = browser.find_element_by_id("accept-cookie-banner-label")
             submit.click()
             time.sleep(10)
@@ -698,16 +698,16 @@ class FacebookPublicAccountParser:
     def getFriendsContent(self, browser, url):
         try:
             if url is not None:
-                time.sleep(7)
+                time.sleep(10)
                 browser.get(url)
                 last_height = browser.execute_script('return document.body.scrollHeight')
                 browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
-                time.sleep(5)
+                time.sleep(7)
                 new_height = browser.execute_script('return document.body.scrollHeight')
                 while new_height != last_height:
                     last_height = new_height
                     browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
-                    time.sleep(5)
+                    time.sleep(10)
                     new_height = browser.execute_script('return document.body.scrollHeight')
 
                 content = browser.execute_script("return document.documentElement.outerHTML;")
@@ -719,16 +719,16 @@ class FacebookPublicAccountParser:
 
     def getAboutContent(self, browser,  url):
         try:
-            time.sleep(7)
+            time.sleep(10)
             browser.get(url)
             last_height = browser.execute_script('return document.body.scrollHeight')
             browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
-            time.sleep(5)
+            time.sleep(8)
             new_height = browser.execute_script('return document.body.scrollHeight')
             while new_height != last_height:
                 last_height = new_height
                 browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
-                time.sleep(5)
+                time.sleep(8)
                 new_height = browser.execute_script('return document.body.scrollHeight')
 
             content = browser.execute_script("return document.documentElement.outerHTML;")
@@ -742,18 +742,18 @@ class FacebookPublicAccountParser:
         friends_contents = []
         profile_photo_urls = []
         try:
-            time.sleep(7)
+            time.sleep(10)
             for link in links:
                 browser.get(link)
-                time.sleep(7)
+                time.sleep(10)
                 last_height = browser.execute_script('return document.body.scrollHeight')
                 browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
-                time.sleep(5)
+                time.sleep(8)
                 new_height = browser.execute_script('return document.body.scrollHeight')
                 while new_height != last_height:
                     last_height = new_height
                     browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
-                    time.sleep(5)
+                    time.sleep(8)
                     new_height = browser.execute_script('return document.body.scrollHeight')
                 content = browser.execute_script("return document.documentElement.outerHTML;")
                 general_urls.append(content)
@@ -765,33 +765,33 @@ class FacebookPublicAccountParser:
                 profile_photo_urls.append(profile_photo_url)
                 about = self.getAboutUrl('main_page.txt')
                 friends = self.getFriendsUrl('main_page.txt')
-                time.sleep(10)
+                time.sleep(15)
                 browser.get(about)
                 last_height = browser.execute_script('return document.body.scrollHeight')
                 browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
-                time.sleep(5)
+                time.sleep(8)
                 new_height = browser.execute_script('return document.body.scrollHeight')
                 while new_height != last_height:
                     last_height = new_height
                     browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
-                    time.sleep(5)
+                    time.sleep(8)
                     new_height = browser.execute_script('return document.body.scrollHeight')
                 content = browser.execute_script("return document.documentElement.outerHTML;")
                 about_contents.append(about)
-                time.sleep(5)
+                time.sleep(8)
                 browser.get(friends)
                 last_height = browser.execute_script('return document.body.scrollHeight')
                 browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
-                time.sleep(5)
+                time.sleep(8)
                 new_height = browser.execute_script('return document.body.scrollHeight')
                 while new_height != last_height:
                     last_height = new_height
                     browser.execute_script('window.scrollTo(0, document.body.scrollHeight);')
-                    time.sleep(5)
+                    time.sleep(8)
                     new_height = browser.execute_script('return document.body.scrollHeight')
                 content = browser.execute_script("return document.documentElement.outerHTML;")
                 friends_contents.append(content)
-                time.sleep(10)
+                time.sleep(15)
             return general_urls, about_contents, friends_contents, profile_photo_urls
         except:
             return [], [], []

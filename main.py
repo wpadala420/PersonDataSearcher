@@ -10,6 +10,10 @@ if __name__ == '__main__':
     file_functions.clear_temportary_files('tmp/facebook')
     file_functions.clear_temportary_files('tmp/instagram')
     file_functions.clear_temportary_files('tmp/twitter')
+    file_functions.clear_temportary_files('tmp/sherlock')
+    file_functions.clear_temportary_files('tmp/pdfs')
+    file_functions.clear_temportary_files('raports')
+
     name = input('Type name and surname\n')
     print('START:' + datetime.now().strftime("%H:%M:%S"))
     print('FACEBOOK SEARCHING...')

@@ -108,11 +108,11 @@ def generate_raport(directory, filename, profile):
             if profile.twitter['report'] != '':
                 tr = 'Analiza Tweetów' + '\n'
                 raport.write(bytes(tr, encoding='utf-8'))
-                with open('tmp/twitter/ ' + profile.twitter['report'], 'rb') as t_report:
+                with open(profile.twitter['report'], 'rb') as t_report:
                     for lt in t_report:
                         new_line = '\t' + str(lt, encoding='utf-8')
                         raport.write(bytes(new_line, encoding='utf-8'))
-                profile.twitter['hashtags'] = functions.search.get_top_hashtags_from_tt_report('tmp/twitter/ ' + profile.twitter['report'])
+                profile.twitter['hashtags'] = functions.search.get_top_hashtags_from_tt_report(profile.twitter['report'])
                 if 'hashtags' in profile.twitter and len(profile.twitter['hashtags']) > 0:
                     hashtags_node = 'HASHTAGS'
                     graph.addEdge(twit_edge, hashtags_node)
@@ -121,10 +121,12 @@ def generate_raport(directory, filename, profile):
                         graph.addEdge(hashtags_node, ht)
 
         if len(profile.instagram) > 0:
-            ig_edge = 'INSTAGRAM\n' + profile.instagram['login']
+            ig_edge = 'INSTAGRAM'
             related_instagram_profiles = modules.sherlock_search.search_sherlock(profile.instagram['login'])
+            ig_edge_nickname = 'USERNAME:\n' + profile.instagram['login']
+            graph.addEdge(ig_edge, ig_edge_nickname)
             for related_instagram in related_instagram_profiles:
-                graph.addEdge(ig_edge, related_instagram['site_name'] + '\n' + related_instagram['site_url'])
+                graph.addEdge(ig_edge_nickname, related_instagram['site_name'] + '\n' + related_instagram['site_url'])
             graph.addEdge(name + ' ' + surname, ig_edge)
             ig_header = 'Dane z Instagrama:' + '\n'
             raport.write(bytes(ig_header, encoding='utf-8'))
@@ -138,9 +140,18 @@ def generate_raport(directory, filename, profile):
             if len(profile.instagram['posts']) > 0:
                 ig_ps = 'Zdjęcia:' + '\n'
                 raport.write(bytes(ig_ps, encoding='utf-8'))
+                connected_people = []
                 for post in profile.instagram['posts']:
                     if post['path'] != '':
+                        for tagged_user in post['users tagged']:
+                            connected_people.append(tagged_user)
                         raport.write(bytes('\t' + post['path'] + '\n', encoding='utf-8'))
+                connected_people = set(connected_people)
+                if len(connected_people) > 0:
+                    tagged_users_node = 'TAGGED_USERS'
+                    graph.addEdge(ig_edge, tagged_users_node)
+                    for cp in connected_people:
+                        graph.addEdge(tagged_users_node, cp)
 
         if len(profile.registries) > 0:
             reg_header = 'Dane z KRS:' + '\n'
