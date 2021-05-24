@@ -216,7 +216,18 @@ def generate_raport(directory, filename, profile):
                             raport.write(bytes('\t\t' + o_data['ceo']['full_name'] + '\n', encoding='utf-8'))
                             raport.write(bytes('\t\t' + o_data['ceo']['birthday'] + '\n', encoding='utf-8'))
                             raport.write(bytes('\t\t' + o_data['ceo']['title'] + '\n', encoding='utf-8'))
-
+        if len(profile.vindicat_data) > 0:
+            vindicat_header = 'DŁUGI:\n'
+            raport.write(bytes(vindicat_header, encoding='utf-8'))
+            vindicat_node = 'DŁUGI'
+            graph.addEdge(name + ' ' + surname, vindicat_node)
+            for vd in profile.vindicat_data:
+                amount_line = 'KWOTA: ' + vd['debts_sum'] + '\n'
+                details_line = 'SZCZEGÓŁY: ' + 'https://vindicat.pl' + vd['site_details']
+                raport.write(bytes(amount_line, encoding='utf-8'))
+                raport.write(bytes(details_line, encoding='utf-8'))
+                vd_node = vd['debts_sum'] + '\n' + 'https://vindicat.pl' + vd['site_details']
+                graph.addEdge(vindicat_node, vd_node)
         graph.visualize(directory + '/' + filename.replace('.txt', '.png'))
 
 

@@ -17,7 +17,7 @@ class Person(object):
         self.facebook = {}
         self.imdb = {}
         self.wiki = {}
-        self.vindicat_data = {}
+        self.vindicat_data = []
         self.keywords = []
 
     def setName(self, name):

@@ -152,4 +152,28 @@ def calculate_distance_between_cities(loc1, loc2):
     return haversine.haversine(loc1, loc2, unit=haversine.Unit.KILOMETERS)
 
 
+def match_vindicat_data(profile, data):
+    if len(profile.facebook) > 0 and 'city' in data:
+        for place in profile.facebook['living_places']:
+            for key in place:
+                if place[key].lower() == data['city'].lower():
+                    return True
+                else:
+                    profile_coordinates = get_city_coordinates(place[key])
+                    data_coordinates = get_city_coordinates(data['city'])
+                    good_coords_profile = False
+                    for pc in profile_coordinates:
+                        if pc != 0:
+                            good_coords_profile = True
+
+                    good_coords_data = False
+                    for dc in data_coordinates:
+                        if dc != 0:
+                            good_coords_data = True
+                    if good_coords_data is True and good_coords_profile is True:
+                        distance = calculate_distance_between_cities(profile_coordinates, data_coordinates)
+                        if distance < 50:
+                            return True
+    return False
+
 

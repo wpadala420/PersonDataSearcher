@@ -1,5 +1,5 @@
 from functions import search, file_functions, matching_functions, raports
-from modules import Person, pdf_search
+from modules import Person, pdf_search, vindicat
 import credentials
 import time
 from datetime import datetime
@@ -155,6 +155,15 @@ if __name__ == '__main__':
                 if matching_functions.match_companies_from_registries(profile, registry):
                     registries_used.append(registry)
                     matching_functions.add_registry_data(profile, registry)
+    vindicat_data = vindicat.search_vindicat(name)
+    vindicat_data_used = []
+    if len(vindicat_data) > 0:
+        for v_data in vindicat_data:
+            if matching_functions.profile_used(vindicat_data_used, v_data) is False:
+                for c_profile in complete_profiles:
+                    if matching_functions.match_vindicat_data(c_profile, v_data):
+                        c_profile.vindicat_data = v_data
+                        vindicat_data_used.append(v_data)
 
     pdf_urls = pdf_search.search_pdfs(name)
     dir = 'tmp/pdfs'
