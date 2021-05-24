@@ -1,3 +1,5 @@
+import haversine
+
 from functions import image_functions
 from modules import Person
 from geopy.geocoders import Nominatim
@@ -146,7 +148,8 @@ def get_city_coordinates(city):
         return (0,0)
 
 
-print(get_city_coordinates('Wilkołaz'))
+def calculate_distance_between_cities(loc1, loc2):
+    return haversine.haversine(loc1, loc2, unit=haversine.Unit.KILOMETERS)
 
 
 
