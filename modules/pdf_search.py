@@ -13,6 +13,9 @@ def download_pdf(directory, filename, url):
     if os.path.isdir(directory) is False:
         os.mkdir(directory)
     path = directory + '/' + filename
-    response = requests.get(url)
-    with open(path, 'wb') as pdf:
-        pdf.write(response.content)
+    try:
+        response = requests.get(url)
+        with open(path, 'wb') as pdf:
+            pdf.write(response.content)
+    except:
+        pass

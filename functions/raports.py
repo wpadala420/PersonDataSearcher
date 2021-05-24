@@ -57,23 +57,39 @@ def generate_raport(directory, filename, profile):
                     photo_line = '\t lokalizacja: ' + photo + '\n'
                     raport.write(bytes(photo_line, encoding='utf-8'))
             if len(profile.facebook['living_places']) > 0:
+                living_node = 'PLACES'
+                graph.addEdge(fb_edge_title, living_node)
                 places = 'Miejsca:' + '\n'
                 raport.write(bytes(places, encoding='utf-8'))
                 for place in profile.facebook['living_places']:
+                    place_node = ''
+                    for key in place:
+                        place_node = key + ' - ' + place[key]
+                        graph.addEdge(living_node, place_node)
+
                     line = '\t' + str(place) + '\n'
                     raport.write(bytes(line, encoding='utf-8'))
 
             if len(profile.facebook['education']) > 0:
+                edu_node = 'EDUCATION'
+                graph.addEdge(fb_edge_title, edu_node)
                 edu = 'Edukacja:' + '\n'
                 raport.write(bytes(edu, encoding='utf-8'))
                 for ed in profile.facebook['education']:
+                    graph.addEdge(edu_node, str(ed))
                     e_line = '\t' + str(ed) + '\n'
                     raport.write(bytes(e_line, encoding='utf-8'))
 
             if len(profile.facebook['relationship']) > 0:
+                relathionghip_node = 'RELATIONSHIP'
+                graph.addEdge(fb_edge_title, relathionghip_node)
                 relat = 'Związki:' + '\n'
                 raport.write(bytes(relat, encoding='utf-8'))
                 for r in profile.facebook['relationship']:
+                    r_node = ''
+                    for rk in r:
+                        r_node = r_node + rk + ' - ' + r[rk] + '\n'
+                    graph.addEdge(relathionghip_node, r_node)
                     r_line = '\t' + str(r) + '\n'
                     raport.write(bytes(r_line, encoding='utf-8'))
 

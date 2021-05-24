@@ -1,6 +1,6 @@
 from functions import image_functions
 from modules import Person
-
+from geopy.geocoders import Nominatim
 
 def match_profiles_by_photos(profile1, profile2):
     if len(profile1.facebook) > 0:
@@ -130,6 +130,23 @@ def add_registry_data(profile, data):
     if profile.rejestrUrl is None or profile.rejestrUrl == '':
         profile.rejestrUrl = data.rejestrUrl
 
+
+def get_city_coordinates(city):
+    try:
+        gc = Nominatim(user_agent='Firefox')
+        loc = gc.geocode(city)
+        longtitude = ''
+        if 'lon' in loc.raw:
+            longtitude = loc.raw['lon']
+        lattitude = ''
+        if 'lat' in loc.raw:
+            lattitude = loc.raw['lat']
+        return (float(longtitude), float(lattitude))
+    except:
+        return (0,0)
+
+
+print(get_city_coordinates('Wilkołaz'))
 
 
 
