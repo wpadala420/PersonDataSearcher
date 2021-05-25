@@ -1,4 +1,5 @@
 import requests
+import Levenshtein
 
 def search_vindicat(name):
     results = []
@@ -7,10 +8,9 @@ def search_vindicat(name):
     for elem in data_json['packages']:
         name_part = name.split(' ')[0]
         surname_part = name.split(' ')[1]
-        if elem['firm_name'].find(name_part) != -1 and elem['firm_name'].find(surname_part) != -1:
+        if Levenshtein.jaro(elem['firm_name'], name) > 0.8 and elem['firm_name'].find(surname_part) != -1:
             results.append(elem)
     return results
-
 
 
 

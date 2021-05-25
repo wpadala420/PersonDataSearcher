@@ -162,7 +162,7 @@ if __name__ == '__main__':
             if matching_functions.profile_used(vindicat_data_used, v_data) is False:
                 for c_profile in complete_profiles:
                     if matching_functions.match_vindicat_data(c_profile, v_data):
-                        c_profile.vindicat_data = v_data
+                        c_profile.vindicat_data.append(v_data)
                         vindicat_data_used.append(v_data)
 
     pdf_urls = pdf_search.search_pdfs(name)

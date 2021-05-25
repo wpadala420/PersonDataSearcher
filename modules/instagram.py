@@ -74,6 +74,8 @@ class InstagramSearcher:
         url = 'https://www.instagram.com/web/search/topsearch/?context=blended&query={}-{}&rank_token=0.6093586799873352&include_reel=true'.format(name.split(' ')[0], name.split(' ')[1])
         data = self.seleniumSearch(credentials.instagram_login, credentials.instagram_password,url)
         # data = session.get(url).json()
+        if 'users' not in data:
+            data['users'] = []
         j = 0
         for i in data['users']:
             osoba = Person()
