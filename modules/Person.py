@@ -19,6 +19,9 @@ class Person(object):
         self.wiki = {}
         self.vindicat_data = []
         self.keywords = []
+        self.fb_username_related_accounts = []
+        self.twitter_username_connected_profiles = []
+        self.instagram_username_related_profiles = []
 
     def setName(self, name):
         self.name=name

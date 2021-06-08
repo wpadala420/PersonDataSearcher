@@ -3,11 +3,11 @@ import functions.visualization_functions
 import functions.search
 import modules.sherlock_search
 
-
 def generate_raport(directory, filename, profile):
     if os.path.isdir(directory) is False:
         os.mkdir(directory)
     path = directory + '/' + filename
+
     graph = functions.visualization_functions.GraphVisualization()
 
     with open(path, 'wb') as raport:
@@ -34,6 +34,7 @@ def generate_raport(directory, filename, profile):
             fb_username_edge = 'USERNAME\n' + profile.facebook['username']
             graph.addEdge(fb_edge_title, fb_username_edge)
             related_accounts = modules.sherlock_search.search_sherlock(profile.facebook['username'])
+            profile.fb_username_related_accounts = related_accounts
             for related_account in related_accounts:
                 graph.addEdge(fb_username_edge, related_account['site_name'] + '\n' + related_account['site_url'])
             fb_friends_node = 'FRIENDS:\n'
@@ -97,6 +98,7 @@ def generate_raport(directory, filename, profile):
             twit_edge = 'TWITTER\n'
             twit_username_node = 'USERNAME:\n' + profile.twitter['nickname']
             twitter_username_connected_profiles = modules.sherlock_search.search_sherlock(profile.twitter['nickname'])
+            profile.twitter_username_connected_profiles = twitter_username_connected_profiles
             graph.addEdge(name + ' ' + surname, twit_edge)
             graph.addEdge(twit_edge, twit_username_node)
             for prof in twitter_username_connected_profiles:
@@ -139,6 +141,7 @@ def generate_raport(directory, filename, profile):
         if len(profile.instagram) > 0:
             ig_edge = 'INSTAGRAM'
             related_instagram_profiles = modules.sherlock_search.search_sherlock(profile.instagram['login'])
+            profile.instagram_username_related_profiles = related_instagram_profiles
             ig_edge_nickname = 'USERNAME:\n' + profile.instagram['login']
             graph.addEdge(ig_edge, ig_edge_nickname)
             for related_instagram in related_instagram_profiles:

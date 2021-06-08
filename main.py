@@ -1,4 +1,4 @@
-from functions import search, file_functions, matching_functions, raports
+from functions import search, file_functions, matching_functions, raports, pdf_generation
 from modules import Person, pdf_search, vindicat
 import credentials
 import time
@@ -172,7 +172,8 @@ if __name__ == '__main__':
 
     for i in range(len(complete_profiles)):
         raports.generate_raport('raports', str(i) + '.txt', complete_profiles[i])
-
+        pdf = pdf_generation.PDFReport(complete_profiles[i])
+        pdf.create('raports/' + str(i) + '.pdf')
 
 
 
