@@ -70,7 +70,7 @@ class PDFReport(FPDF):
             if len(self.profile.facebook['photos_paths']) > 0:
                 self.cell(0, 5, 'Zdjecia:', ln=1)
                 for photo in self.profile.facebook['photos_paths']:
-                    self.image(photo, 100)
+                    self.image(photo)
             if len(self.profile.facebook['friends']) > 0:
                 self.cell(0, 5, 'Znajomi:', ln=1)
                 for friend in self.profile.facebook['friends']:
@@ -86,7 +86,7 @@ class PDFReport(FPDF):
             self.cell(0, 5, 'Username: ' + self.profile.twitter['nickname'], ln=1)
             if self.profile.twitter['profile_img_path'] != '':
                 self.cell(0, 5, 'Zdjecie profilowe:', ln=1)
-                self.image(self.profile.twitter['profile_img_path'], 75)
+                self.image(self.profile.twitter['profile_img_path'])
             if 'role' in self.profile.twitter:
                 self.multi_cell(0, 5, self.profile.twitter['role'])
                 self.ln(20)
@@ -114,13 +114,13 @@ class PDFReport(FPDF):
             self.cell(0, 5, 'Username: ' + self.profile.instagram['login'], ln=1)
             if self.profile.instagram['profile_photo_path'] != '':
                 self.cell(0, 5, 'Zdjecie profilowe:', ln=1)
-                self.image(self.profile.instagram['profile_photo_path'], 100)
+                self.image(self.profile.instagram['profile_photo_path'])
             if len(self.profile.instagram['posts']) > 0:
                 self.cell(0, 5, 'Zdjecia:', ln=1)
                 connected_people = []
                 for post in self.profile.instagram['posts']:
                     if post['path'] != '':
-                        self.image(post['path'], 100)
+                        self.image(post['path'])
                         for tagged_user in post['users tagged']:
                             connected_people.append(tagged_user)
                 connected_people = set(connected_people)
