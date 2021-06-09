@@ -219,6 +219,7 @@ def generate_raport(directory, filename, profile):
                             raport.write(bytes('\t\t' + o_data['ceo']['full_name'] + '\n', encoding='utf-8'))
                             raport.write(bytes('\t\t' + o_data['ceo']['birthday'] + '\n', encoding='utf-8'))
                             raport.write(bytes('\t\t' + o_data['ceo']['title'] + '\n', encoding='utf-8'))
+
         if len(profile.vindicat_data) > 0:
             vindicat_header = 'DŁUGI:\n'
             raport.write(bytes(vindicat_header, encoding='utf-8'))

@@ -7,32 +7,32 @@ import pickle
 
 
 if __name__ == '__main__':
-    file_functions.clear_temportary_files('tmp/facebook')
-    file_functions.clear_temportary_files('tmp/instagram')
-    file_functions.clear_temportary_files('tmp/twitter')
-    file_functions.clear_temportary_files('tmp/sherlock')
-    file_functions.clear_temportary_files('tmp/pdfs')
-    file_functions.clear_temportary_files('raports')
+    # file_functions.clear_temportary_files('tmp/facebook')
+    # file_functions.clear_temportary_files('tmp/instagram')
+    # file_functions.clear_temportary_files('tmp/twitter')
+    # file_functions.clear_temportary_files('tmp/sherlock')
+    # file_functions.clear_temportary_files('tmp/pdfs')
+    # file_functions.clear_temportary_files('raports')
 
     name = input('Type name and surname\n')
     print('START:' + datetime.now().strftime("%H:%M:%S"))
     print('FACEBOOK SEARCHING...')
     facebook_result = []
-    facebook_result = search.facebook_search(name, credentials.email, credentials.password)
-    with open('facebook2.dump', 'wb') as facebook_dump:
-        pickle.dump(facebook_result, facebook_dump)
-    # # with open('facebook2.dump', 'rb') as fb:
-    # #     facebook_result = pickle.load(fb)
+    # facebook_result = search.facebook_search(name, credentials.email, credentials.password)
+    # with open('facebook2.dump', 'wb') as facebook_dump:
+    #     pickle.dump(facebook_result, facebook_dump)
+    with open('facebook2.dump', 'rb') as fb:
+        facebook_result = pickle.load(fb)
 
     print('FACEBOOK SEARCHING FINISHED')
     print(datetime.now().strftime("%H:%M:%S"))
     print('SEARCHING INSTAGRAM')
     instagram_result = []
-    instagram_result = search.instagram_search(name)
-    with open('instagram2.dump', 'wb') as instagram_dump:
-        pickle.dump(instagram_result, instagram_dump)
-    # with open('instagram2.dump', 'rb') as ig:
-    #     instagram_result = pickle.load(ig)
+    # instagram_result = search.instagram_search(name)
+    # with open('instagram2.dump', 'wb') as instagram_dump:
+    #     pickle.dump(instagram_result, instagram_dump)
+    with open('instagram2.dump', 'rb') as ig:
+        instagram_result = pickle.load(ig)
 
     print('SEARCHING INSTAGRAM FINISHED')
     print(datetime.now().strftime("%H:%M:%S"))
@@ -40,9 +40,9 @@ if __name__ == '__main__':
     twitter_result = search.twitter_search(name)
     for twiter in twitter_result:
         search.get_tweets_reports(twiter)
-    # with open('twitter2.dump', 'wb') as twitter_dump:
-    #     pickle.dump(twitter_result, twitter_dump)
-    # twitter_result = []
+    with open('twitter2.dump', 'wb') as twitter_dump:
+        pickle.dump(twitter_result, twitter_dump)
+
     # with open('twitter2.dump', 'rb') as tt:
     #     twitter_result = pickle.load(tt)
 
@@ -140,7 +140,8 @@ if __name__ == '__main__':
         if matching_functions.profile_used(twitter_profiles_used, t_res) is False:
             twitter_profiles_used.append(t_res)
             complete_profiles.append(t_res)
-
+    with open('data2.dump', 'wb') as dump_data:
+        pickle.dump(complete_profiles, dump_data)
     # with open('data2.dump', 'rb') as dump_data:
     #     complete_profiles = pickle.load(dump_data)
     print('FINISH, complete results:')
