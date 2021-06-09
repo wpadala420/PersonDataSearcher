@@ -35,7 +35,7 @@ class PDFReport(FPDF):
 
         self.cell(100)
         self.cell(0, 5, (name + ' ' + surname), ln=1)
-        self.ln(30)
+        self.ln(60)
 
     def create(self, path):
         self.set_doc_option('core_fonts_encoding', 'utf-8')
@@ -88,7 +88,8 @@ class PDFReport(FPDF):
                 self.cell(0, 5, 'Zdjecie profilowe:', ln=1)
                 self.image(self.profile.twitter['profile_img_path'], 75)
             if 'role' in self.profile.twitter:
-                self.cell(0, 5, self.profile.twitter['role'], ln=1)
+                self.multi_cell(0, 5, self.profile.twitter['role'])
+                self.ln(20)
             if len(self.profile.twitter['sites']) > 0:
                 self.cell(0, 5, 'Powiazane strony:', ln=1)
                 for site in self.profile.twitter['sites']:
