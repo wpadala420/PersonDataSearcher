@@ -22,6 +22,7 @@ class Person(object):
         self.fb_username_related_accounts = []
         self.twitter_username_connected_profiles = []
         self.instagram_username_related_profiles = []
+        self.articles = []
 
     def setName(self, name):
         self.name=name
@@ -66,6 +67,26 @@ class Person(object):
         print(self.rejestrUrl)
 
     def makeKeywords(self):
+        if len(self.facebook) > 0:
+            for friend in self.facebook['friends']:
+                self.keywords.append(friend)
+            if len(self.facebook['living_places']) > 0:
+                for place in self.facebook['living_places']:
+                    for key in place:
+                        self.keywords.append(place[key])
+            if len(self.facebook['education']) > 0:
+                for ed in self.facebook['education']:
+                    self.keywords.append(str(ed))
+        if len(self.twitter) > 0:
+            if 'role' in self.twitter:
+                if len(self.twitter['role'].split(' ')) < 4:
+                    self.keywords.append(self.twitter['role'])
+                for elem in self.twitter['role'].split(' '):
+                    if len(elem) > 4:
+                        self.keywords.append(elem)
+
+
+
         pass
 
     def fuze(self, person):

@@ -16,4 +16,4 @@ def search_articles(name):
                 elem['url'] = record['url']
                 elem['text'] = record['text']
                 data_list.append(elem)
-    return data
+    return data_list

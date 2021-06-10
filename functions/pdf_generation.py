@@ -158,4 +158,13 @@ class PDFReport(FPDF):
                 details_line = 'SZCZEGOŁY: ' + 'https://vindicat.pl' + vd['site_details']
                 self.cell(0, 5, amount_line, ln=1)
                 self.cell(0, 5, details_line, ln=1)
+        if len(self.profile.articles) > 0:
+            self.cell(0, 5, 'INNE:', ln=1, align='C')
+            for art in self.profile.articles:
+                self.cell(0, 5, art['title'], ln=1)
+                self.ln(1)
+                self.multi_cell(0, 5, art['text'])
+                self.ln(1)
+                self.multi_cell(0, 5, 'URL: ' + art['url'])
+                self.ln(3)
         self.output(path)
