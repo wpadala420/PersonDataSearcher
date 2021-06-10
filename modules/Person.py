@@ -65,6 +65,9 @@ class Person(object):
         print(self.registries)
         print(self.rejestrUrl)
 
+    def makeKeywords(self):
+        pass
+
     def fuze(self, person):
         pass
 
