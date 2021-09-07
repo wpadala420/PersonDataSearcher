@@ -8,6 +8,7 @@ import time
 import re
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+from selenium.common import exceptions
 import json
 import os
 from functions import image_functions
@@ -690,7 +691,7 @@ class FacebookPublicAccountParser:
             not_now.click()
             time.sleep(7)
             return browser
-        except:
+        except exceptions.WebDriverException:
             return None
 
 

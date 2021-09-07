@@ -9,7 +9,7 @@ from modules.Person import Person
 import os
 import urllib3
 from instagramPictures import *
-from instaloader import *
+import instaloader
 import time
 import functions.image_functions
 #from facebookHandler import Account
@@ -71,7 +71,8 @@ class InstagramSearcher:
         session.headers.update({
             'User-Agent': 'Mozilla/5.0 (X11; Linux i686; rv:39.0) Gecko/20100101 Firefox/39.0'
         })
-        url = 'https://www.instagram.com/web/search/topsearch/?context=blended&query={}-{}&rank_token=0.6093586799873352&include_reel=true'.format(name.split(' ')[0], name.split(' ')[1])
+        url = 'https://www.instagram.com/web/search\
+                /topsearch/?context=blended&query={}-{}&rank_token=0.6093586799873352&include_reel=true'.format(name.split(' ')[0], name.split(' ')[1])
         data = self.seleniumSearch(credentials.instagram_login, credentials.instagram_password,url)
         # data = session.get(url).json()
         if 'users' not in data:
@@ -97,8 +98,9 @@ class InstagramSearcher:
             osoba.instagram['posts'] = []
             if i['user']['is_private'] is False:
                 try:
-                    ip = Instaloader()
-                    profile = Profile.from_username(ip.context, osoba.instagram['login'])
+
+                    ip = instaloader.Instaloader()
+                    profile = instaloader.Profile.from_username(ip.context, osoba.instagram['login'])
                     for p in profile.get_posts():
                         post = {}
                         post['date'] = str(p.date)

@@ -18,7 +18,7 @@ class TwitterSearch:
                                    'sLGTfM0dZd2nIcjwzZEXtmhDzOmErr7mcVe9G8V4kxl0qporTM'
                                   ))
 
-
+         
         results = twitter.users.search(q = '"{}"'.format(name))
 
         for i in results:
